@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+# from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix
 
 # import the datasets
@@ -49,28 +50,38 @@ df = df[['sex',
          'priors_count',
          'is_violent_recid']]
 
-# df = df.assign(sex_b=df['sex'] == 'Male')
-# df = df.assign(race_b=df['race'] == 'African-American')
+df = df.assign(sex_b=df['sex'] == 'Male')
+df = df.assign(race_b=df['race'] == 'African-American')
 df = df.drop(columns=['sex', 'race'])
+# df = df[df['race_b'] == 0]
 
 # give the model variables and see if it predicts properly
 x = df.drop('is_violent_recid', axis=1)
 y = np.ravel(df['is_violent_recid'])
 
-x_train, x_test, y_train, y_test = train_test_split(x,y, test_size = 0.5, random_state=50)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5, random_state=13)
 
 scaler = StandardScaler().fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
-svc_model = SVC()
-svc_model.fit(x_train, y_train)
-y_predict = svc_model.predict(x_test)
+# svc_model = SVC()
+# svc_model.fit(x_train, y_train)
+# y_predict = svc_model.predict(x_test)
+clf = LogisticRegression(random_state=17).fit(x_train, y_train)
+y_predict = clf.predict_proba(x_test)
 
-cm = np.array(confusion_matrix(y_test, y_predict, labels=[0,1]))
-confusion = pd.DataFrame(cm, index=['recid', 'not recid'], columns=['predicted recid', 'predicted not recid'])
+comp = {'actual': y_test,
+        'predicted': y_predict[:, 1]}
 
-print(confusion)
-print(classification_report(y_test, y_predict))
+comper = pd.DataFrame(comp, columns=['actual', 'predicted'])
+
+print(comper)
+
+# cm = np.array(confusion_matrix(y_test, y_predict, labels=[0,1]))
+# confusion = pd.DataFrame(cm, index=['not recid', 'recid'], columns=['predicted not recid', 'predicted recid'])
+#
+# print(confusion)
+# print(classification_report(y_test, y_predict))
 
 # print(df)
