@@ -10,12 +10,16 @@ df = df[(df['days_b_screening_arrest'] >= -30) &
         (df['v_score_text'] != 'N/A') &
         (df['c_charge_degree'] != 'O')]
 
-df = df[['race', 'decile_score', 'is_recid']]
+df = df[['race', 'decile_score', 'score_text', 'is_recid']]
+
+# It seems that propublica decided to lock up everyone who had a 'High' as their text and let everyone with 'Low' go
+# Not sure if this is the right way to think about FPR, FNR in our case but we can determine that ourselves I think
+# 1-4 is Low, 8-10 is High
 
 
 def get_rates(d, s):
-    d = d[d['race'] == s]
-    print(d.groupby('decile_score').mean())
+    d_group = d[d['race'] == s]
+    print(d_group.groupby('decile_score').mean())
 
 
 get_rates(df, 'African-American')
