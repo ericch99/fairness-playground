@@ -7,7 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 
 # import the datasets
-df = pd.read_csv('../compas-analysis/compas-scores-two-years-violent.csv', low_memory=False)
+df = pd.read_csv('./compas-analysis/compas-scores-two-years-violent.csv', low_memory=False)
 
 # filer to replicate propublica
 df = df[['name',
