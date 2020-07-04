@@ -68,23 +68,15 @@ def get_rates(d, s):
     print(d.groupby('decile_score').mean())
 
 
-def rates(d, s):
-    if s == "TPR":
-        d = d[d['score_text'] == 'High']
-        d = d.assign(true_pos=d['is_recid'] == 1)
-        return d.groupby('race').mean()
-    elif s == "FPR":
-        d = d[d['score_text'] == 'High']
-        d = d.assign(false_pos=d['is_recid'] == 0)
-        return d.groupby('race').mean()
-    elif s == "TNR":
-        d = d[d['score_text'] == 'Low']
-        d.assign(true_neg=d['is_recid'] == 0)
-        return d.groupby('race').mean()
-    else: # FNR
-        d = d[d['score_text'] == 'Low']
-        d = d.assign(false_neg=d['is_recid'] == 1)
-        return d.groupby('race').mean()
+def rates(d):
+    d = d.assign(tp=(d['score_text'] == 'High') & (d['is_recid'] == 1),
+                 fp=(d['score_text'] == 'High') & (d['is_recid'] == 0),
+                 tn=(d['score_text'] == 'Low') & (d['is_recid'] == 0),
+                 fn=(d['score_text'] == 'Low') & (d['is_recid'] == 1))
+    sums = d.groupby('race').sum()
+    sums = sums.assign(false_pos=lambda x: x.fp / (x.fp + x.tn),
+                       false_neg=lambda x: x.fn / (x.fn + x.tp))
+    return sums
 
 
 def run_iteration(d):
@@ -116,10 +108,10 @@ def main():
 
     # plot distribution without any modifications
     plot_deciles(df, 'PRE')
-    FPR_AA.append(rates(df, 'FPR')['false_pos'].values[0])
-    FPR_C.append(rates(df, 'FPR')['false_pos'].values[1])
-    FNR_AA.append(rates(df, 'FNR')['false_neg'].values[0])
-    FNR_C.append(rates(df, 'FNR')['false_neg'].values[1])
+    FPR_AA.append(rates(df)['false_pos'].values[0])
+    FPR_C.append(rates(df)['false_pos'].values[1])
+    FNR_AA.append(rates(df)['false_neg'].values[0])
+    FNR_C.append(rates(df)['false_neg'].values[1])
     
     # run iterations
     for i in tqdm(range(NUM_ITER)):
