@@ -80,24 +80,43 @@ def rates(d):
 
 
 def run_iteration(d):
-    # order -- African-American, Caucasian
-    FPR = rates(d, 'FPR')['false_pos'].values
-    FNR = rates(d, 'FNR')['false_neg'].values
-    prob_AA = stats.multinomial(1, [FPR[0], FNR[0], 1 - FPR[0] - FNR[0]])
-    prob_C = stats.multinomial(1, [FPR[1], FNR[1], 1 - FPR[1] - FNR[1]])
-    
-    for i, row in d.iterrows():
-        if row[0] == 'African-American':
-            step = np.where(prob_AA.rvs()[0] == 1)[0][0]
-        else: 
-            step = np.where(prob_C.rvs()[0] == 1)[0][0]
+    fpr_aa = rates(d)['false_pos'].values[0]
+    fpr_c = rates(d)['false_pos'].values[1]
+    fnr_aa = rates(d)['false_neg'].values[0]
+    fnr_c = rates(d)['false_neg'].values[1]
 
-        if step == 0 and row[1] != 1:
+    for i, row in d.iterrows():
+        prob = np.random.rand(1)
+        delta = 0
+        if row['race'] == 'African-American':
+            if prob < fpr_aa:
+                delta = 1
+            elif prob < fpr_aa + fnr_aa:
+                delta = -1
+        else:
+            if prob < fpr_c:
+                delta = 1
+            elif prob < fpr_c + fnr_c:
+                delta = -1
+
+        if delta == -1 and row[1] != 1:
             d.at[i, 'decile_score'] = row[1] - 1
-        elif step == 1 and row[1] != 10:
+        elif delta == 1 and row[1] != 10:
             d.at[i, 'decile_score'] = row[1] + 1
 
+        reset_score(row)
+
     return d
+
+
+# resets the text score of a given row
+def reset_score(arr):
+    if arr[1] < 5:
+        arr[2] = 'Low'
+    elif arr[1] < 8:
+        arr[2] = 'Medium'
+    else:
+        arr[2] = 'High'
 
 
 def main():
@@ -119,10 +138,10 @@ def main():
         plot_deciles(df, i + 1)
 
         # this needs to be fixed!
-        FPR_AA.append(rates(df, 'FPR')['false_pos'].values[0])
-        FPR_C.append(rates(df, 'FPR')['false_pos'].values[1])
-        FNR_AA.append(rates(df, 'FNR')['false_neg'].values[0])
-        FNR_C.append(rates(df, 'FNR')['false_neg'].values[1])
+        FPR_AA.append(rates(df)['false_pos'].values[0])
+        FPR_C.append(rates(df)['false_pos'].values[1])
+        FNR_AA.append(rates(df)['false_neg'].values[0])
+        FNR_C.append(rates(df)['false_neg'].values[1])
 
     plot_rates(FPR_AA, FPR_C, FNR_AA, FNR_C, NUM_ITER)
 
