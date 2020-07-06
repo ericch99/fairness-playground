@@ -123,7 +123,7 @@ def main():
     df = prepare_data()
     FPR_AA, FPR_C = [], []
     FNR_AA, FNR_C = [], [] 
-    NUM_ITER = 25
+    NUM_ITER = 10
 
     # plot distribution without any modifications
     plot_deciles(df, 'PRE')
