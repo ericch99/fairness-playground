@@ -90,21 +90,21 @@ def run_iteration(d):
         delta = 0
         if row['race'] == 'African-American':
             if prob < fpr_aa:
-                delta = 1
-            elif prob < fpr_aa + fnr_aa:
                 delta = -1
+            elif prob < fpr_aa + fnr_aa:
+                delta = 1
         else:
             if prob < fpr_c:
-                delta = 1
-            elif prob < fpr_c + fnr_c:
                 delta = -1
+            elif prob < fpr_c + fnr_c:
+                delta = 1
 
         if delta == -1 and row[1] != 1:
             d.at[i, 'decile_score'] = row[1] - 1
         elif delta == 1 and row[1] != 10:
             d.at[i, 'decile_score'] = row[1] + 1
 
-        reset_score(row)
+        d.at[i, 'score_text'] = reset_score(row)
 
     return d
 
@@ -112,18 +112,18 @@ def run_iteration(d):
 # resets the text score of a given row
 def reset_score(arr):
     if arr[1] < 5:
-        arr[2] = 'Low'
+        return 'Low'
     elif arr[1] < 8:
-        arr[2] = 'Medium'
+        return 'Medium'
     else:
-        arr[2] = 'High'
+        return 'High'
 
 
 def main():
     df = prepare_data()
     FPR_AA, FPR_C = [], []
     FNR_AA, FNR_C = [], [] 
-    NUM_ITER = 5
+    NUM_ITER = 25
 
     # plot distribution without any modifications
     plot_deciles(df, 'PRE')
