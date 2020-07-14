@@ -1,4 +1,5 @@
 from scipy.stats import beta
+from scipy.stats import norm
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -60,10 +61,17 @@ def rank_max_util(arr_a, arr_b):
 
 
 # can play around with using a different distribution (Normal, Poisson)
-def sample_dist(mean, var, l, prop):
+def sample_beta(mean, var, l, prop):
     a = ((1 - mean) / var - 1 / mean) * mean * mean
     b = a * (1 / mean - 1)
-    arr = np.array(beta.rvs(a, b, size=int(l*prop)))
+    arr = np.array(beta.rvs(a, b, size=int(l * prop)))
+    arr = np.sort(arr)
+    arr = arr[::-1]
+    return arr
+
+
+def sample_norm(mean, var, l, prop):
+    arr = np.array(norm.rvs(loc=mean, scale=var, size=int(l * prop)))
     arr = np.sort(arr)
     arr = arr[::-1]
     return arr
@@ -73,8 +81,8 @@ def main():
     average_a = np.empty(NUM_ITER)
     average_b = np.empty(NUM_ITER)
     for i in range(NUM_ITER):
-        arr_a = sample_dist(MEAN_A, VAR_A, QUERY_LEN, PROP_A)
-        arr_b = sample_dist(MEAN_B, VAR_B, QUERY_LEN, PROP_B)
+        arr_a = sample_norm(MEAN_A, VAR_A, QUERY_LEN, PROP_A)
+        arr_b = sample_norm(MEAN_B, VAR_B, QUERY_LEN, PROP_B)
         avg_a, avg_b = rank_max_util(arr_a, arr_b)
         average_a[i] = avg_a
         average_b[i] = avg_b
@@ -92,7 +100,7 @@ MEAN_A = 0.55
 MEAN_B = 0.45
 VAR_A = 0.1
 VAR_B = 0.1
-NUM_ITER = 10
+NUM_ITER = 100
 
 if __name__ == '__main__':
     main()
