@@ -9,7 +9,7 @@ sns.set(style='darkgrid')
 
 """
 TODO:
-    - implement `update_means` -- change distribution at each iteration
+    - should stop changing distributions once means converge?
     - need to incorporate NDCG in fair rankings
         * NDCG vs. exposure?
     - implement more fair ranking policies for comparison to max-util
@@ -153,6 +153,7 @@ def avg_exposure(rank_a, rank_b):
 
 def update_mean(mean):
     sig = 1 / (1 + np.exp(-mean))
+    # should play more with changes in the mean
     delta = sig * 0.5 - (1 - sig) * 0.5
     return delta
 
