@@ -12,17 +12,17 @@ def prepare_data():
     df = pd.read_csv('compas-scores-two-years.csv', low_memory=False)
 
     # filter
-    df = df[(df['days_b_screening_arrest'] >= -30) &
-            (df['days_b_screening_arrest'] <= 30) &
-            (df['is_recid'] != -1) &
-            (df['v_score_text'] != 'N/A') &
-            (df['c_charge_degree'] != 'O')]
+    # df = df[(df['days_b_screening_arrest'] >= -30) &
+    #         (df['days_b_screening_arrest'] <= 30) &
+    #         (df['is_recid'] != -1) &
+    #         (df['v_score_text'] != 'N/A') &
+    #         (df['c_charge_degree'] != 'O')]
 
     df = df[['race', 'decile_score', 'score_text', 'is_recid']]
     df = df[(df['race'] == 'Caucasian') | (df['race'] == 'African-American')]
     return df
 
-
+# They DO NOT filter the data when investigating false positive and negative rates
 # It seems that propublica decided to lock up everyone who had a 'High' as their text and let everyone with 'Low' go
 # Not sure if this is the right way to think about FPR, FNR in our case but we can determine that ourselves I think
 # 1-4 is Low, 8-10 is High

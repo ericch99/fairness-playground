@@ -3,6 +3,7 @@ from scipy.stats import beta
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 import seaborn as sns;
+import math
 
 sns.set(style='darkgrid')
 
@@ -52,8 +53,12 @@ def rank_top_k(arr_a, arr_b, k, prob_a):
 
     # rank remaining subjects by max-util strategy
     remain_a, remain_b = rank_max_util(arr_a[a:], arr_b[b:])
-    rank_a.extend([s_a + k for s_a in remain_a])
-    rank_b.extend([s_b + k for s_b in remain_b])
+    for s_a in remain_a:
+        rank_a = np.append(rank_a, s_a + k)
+    for s_b in remain_b:
+        rank_b = np.append(rank_b, s_b + k)
+    # rank_a.append([s_a + k for s_a in remain_a])
+    # rank_b.append([s_b + k for s_b in remain_b])
 
     return rank_a, rank_b
 
@@ -91,29 +96,29 @@ def rank_max_util(arr_a, arr_b):
 # DISTRIBUTIONS =========================================================
 
 
-def sample_dist(dist, mean, var, QUERY_LEN, prob):
+def sample_dist(dist, mean, var, ql, prob):
     """
     Returns length-(QUERY_LEN * prob) list of relevances (in decreasing order) 
     as sampled from a chosen distribution with specified mean and variance
     """
     if dist == 'beta':
-        return sample_beta(mean, var, QUERY_LEN, prob)
+        return sample_beta(mean, var, ql, prob)
     elif dist == 'normal':
-        return sample_normal(mean, var, QUERY_LEN, prob)
+        return sample_normal(mean, var, ql, prob)
     else:
         # TODO
         pass
 
 
-def sample_beta(mean, var, q_len, prob):
+def sample_beta(mean, var, ql, prob):
     a = (((1 - mean) / var) - (1 / mean)) * (mean ** 2)
     b = a * ((1 / mean) - 1)
-    arr = np.array(beta.rvs(a, b, size=int(q_len * prob)))
+    arr = np.array(beta.rvs(a, b, size=int(ql * prob)))
     return np.sort(arr)[::-1]
 
 
-def sample_normal(mean, var, q_len, prob):
-    arr = np.array(norm.rvs(loc=mean, scale=var, size=int(q_len * prob)))
+def sample_normal(mean, var, ql, prob):
+    arr = np.array(norm.rvs(loc=mean, scale=var, size=int(ql * prob)))
     return np.sort(arr)[::-1]
 
 
@@ -128,6 +133,8 @@ def compute_metric(rank_a, rank_b, metric):
     """
     if metric == 'avg_position':
         return avg_position(rank_a, rank_b)
+    elif metric == 'avg_exposure':
+        return avg_exposure(rank_a, rank_b)
     else:
         # TODO 
         pass
@@ -137,44 +144,45 @@ def avg_position(rank_a, rank_b):
     return np.mean(rank_a), np.mean(rank_b)
 
 
-def avg_exposure():
-    # TODO 
-    pass
+def avg_exposure(rank_a, rank_b):
+    return 1 / math.log2(1 + avg_position(rank_a, rank_b)[0]), 1 / math.log2(1 + avg_position(rank_a, rank_b)[1])
 
 
 # ///////////////////////////////////////////////////////////////////////
 
 
-def update_means():
-    # TODO
-    pass
-
+def update_mean(mean):
+    sig = 1 / (1 + np.exp(-mean))
+    delta = sig * 0.5 - (1 - sig) * 0.5
+    return delta
 
 def main():
-    PROB_A = 0.7
+    PROB_A = 0.6
     PROB_B = 1 - PROB_A
-    MEAN_A = 0.55
-    MEAN_B = 0.45
-    VAR_A = 0.1
-    VAR_B = 0.1
+    MEAN_A = 1
+    MEAN_B = -1
+    VAR_A = 0.5
+    VAR_B = 0.5
     QUERY_LEN = 10
-    NUM_ITER = 10
+    NUM_ITER = 25
     METRIC = 'avg_position'
+    DIST = 'normal'
 
     metric_a = np.empty(NUM_ITER)
     metric_b = np.empty(NUM_ITER)
 
     for i in range(NUM_ITER):
         # sample QUERY_LEN subjects from underlying distribution
-        arr_a = sample_beta(MEAN_A, VAR_A, QUERY_LEN, PROB_A)
-        arr_b = sample_beta(MEAN_B, VAR_B, QUERY_LEN, PROB_B)
+        arr_a = sample_dist(DIST, MEAN_A, VAR_A, QUERY_LEN, PROB_A)
+        arr_b = sample_dist(DIST, MEAN_B, VAR_B, QUERY_LEN, PROB_B)
 
         # rank subjects according to chosen policy, compute metric
-        rank_a, rank_b = rank_max_util(arr_a, arr_b)
+        rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
         metric_a[i], metric_b[i] = compute_metric(rank_a, rank_b, METRIC)
 
         # update population distributions for next iteration
-        update_means()
+        MEAN_A += update_mean(np.mean(arr_a))
+        MEAN_B += update_mean(np.mean(arr_b))
 
     # plot change in metric over time
     plt.plot(np.arange(NUM_ITER), metric_a, color='C2', label=f'Group A {METRIC}')
