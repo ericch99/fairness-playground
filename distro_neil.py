@@ -1,18 +1,21 @@
 import numpy as np
 from scipy.stats import beta
 from scipy.stats import norm
+from scipy.special import softmax
 import matplotlib.pyplot as plt
-import seaborn as sns;
+import random
+import seaborn as sns
 import math
 
 sns.set(style='darkgrid')
 
 """
 TODO:
-    - should stop changing distributions once means converge?
+    - should stop changing distributions once means converge...
     - need to incorporate NDCG in fair rankings
         * NDCG vs. exposure?
     - implement more fair ranking policies for comparison to max-util
+    - only look at top-k for success/failure rates?
 """
 
 
@@ -31,8 +34,7 @@ def rank_top_k(arr_a, arr_b, k, prob_a):
     k = k_a + k_b
 
     a, b = 0, 0
-    rank_a = arr_a
-    rank_b = arr_b
+    rank_a, rank_b = arr_a, arr_b
 
     # rank top k subjects subject to demographic parity constraint 
     while a < k_a and b < k_b:
@@ -53,12 +55,10 @@ def rank_top_k(arr_a, arr_b, k, prob_a):
 
     # rank remaining subjects by max-util strategy
     remain_a, remain_b = rank_max_util(arr_a[a:], arr_b[b:])
-    for s_a in remain_a:
-        rank_a = np.append(rank_a, s_a + k)
-    for s_b in remain_b:
-        rank_b = np.append(rank_b, s_b + k)
-    # rank_a.append([s_a + k for s_a in remain_a])
-    # rank_b.append([s_b + k for s_b in remain_b])
+    # for s_a in remain_a:
+    rank_a = np.append(rank_a, [s_a + k for s_a in remain_a])
+    # for s_b in remain_b:
+    rank_b = np.append(rank_b, [s_b + k for s_b in remain_b])
 
     return rank_a, rank_b
 
@@ -69,8 +69,7 @@ def rank_max_util(arr_a, arr_b):
     equivalent to ranking in order of relevance.
     """
     a, b = 0, 0
-    rank_a = arr_a
-    rank_b = arr_b
+    rank_a, rank_b = arr_a, arr_b
 
     while a < len(arr_a) and b < len(arr_b):
         if arr_a[a] > arr_b[b]:
@@ -87,6 +86,32 @@ def rank_max_util(arr_a, arr_b):
     while b < len(arr_b):
         rank_b[b] = a + b + 1
         b = b + 1
+
+    return rank_a, rank_b
+
+
+def rank_stoch(arr_a, arr_b):
+    rank_a, rank_b = np.empty(len(arr_a)), np.empty(len(arr_b))
+    a, b = 0, 0
+
+    s = softmax(np.append(arr_a, arr_b))
+
+    while len(arr_a) > 0 or len(arr_b) > 0:
+        s = softmax(np.append(arr_a, arr_b))
+        rand = random.uniform(0, 1)
+        summer = 0
+        for i in range(len(s)):
+            summer += s[i]
+            if rand < summer:
+                if i in range(0, len(arr_a)):
+                    rank_a[a] = a + b + 1
+                    a += 1
+                    arr_a = np.delete(arr_a, [i])
+                else:
+                    rank_b[b] = a + b + 1
+                    b += 1
+                    arr_b = np.delete(arr_b, [i - len(arr_a)])
+                break
 
     return rank_a, rank_b
 
@@ -160,10 +185,10 @@ def update_mean(mean):
 def main():
     PROB_A = 0.6
     PROB_B = 1 - PROB_A
-    MEAN_A = 1
-    MEAN_B = -1
-    VAR_A = 0.5
-    VAR_B = 0.5
+    MEAN_A = 1.5
+    MEAN_B = -1.5
+    VAR_A = 1
+    VAR_B = 1
     QUERY_LEN = 10
     NUM_QUERIES = 10
     NUM_ITER = 10
@@ -183,7 +208,8 @@ def main():
             arr_b = sample_dist(DIST, MEAN_B, VAR_B, QUERY_LEN, PROB_B)
 
             # rank subjects according to chosen policy, compute metric
-            rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
+            # rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
+            rank_a, rank_b = rank_stoch(arr_a, arr_b)
             a_metrics[j], b_metrics[j] = compute_metric(rank_a, rank_b, METRIC)
 
         # take the mean of the metrics over the queries at each step
