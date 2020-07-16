@@ -165,23 +165,32 @@ def main():
     VAR_A = 0.5
     VAR_B = 0.5
     QUERY_LEN = 10
-    NUM_ITER = 25
+    NUM_QUERIES = 10
+    NUM_ITER = 10
     METRIC = 'avg_position'
     DIST = 'normal'
 
-    metric_a = np.empty(NUM_ITER)
-    metric_b = np.empty(NUM_ITER)
+    metric_a, mean_a = np.empty(NUM_ITER), np.empty(NUM_ITER)
+    metric_b, mean_b = np.empty(NUM_ITER), np.empty(NUM_ITER)
 
     for i in range(NUM_ITER):
-        # sample QUERY_LEN subjects from underlying distribution
-        arr_a = sample_dist(DIST, MEAN_A, VAR_A, QUERY_LEN, PROB_A)
-        arr_b = sample_dist(DIST, MEAN_B, VAR_B, QUERY_LEN, PROB_B)
+        a_metrics = np.empty(NUM_QUERIES)
+        b_metrics = np.empty(NUM_QUERIES)
 
-        # rank subjects according to chosen policy, compute metric
-        rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
-        metric_a[i], metric_b[i] = compute_metric(rank_a, rank_b, METRIC)
+        for j in range(NUM_QUERIES):
+            # sample QUERY_LEN subjects from underlying distribution
+            arr_a = sample_dist(DIST, MEAN_A, VAR_A, QUERY_LEN, PROB_A)
+            arr_b = sample_dist(DIST, MEAN_B, VAR_B, QUERY_LEN, PROB_B)
+
+            # rank subjects according to chosen policy, compute metric
+            rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
+            a_metrics[j], b_metrics[j] = compute_metric(rank_a, rank_b, METRIC)
+
+        # take the mean of the metrics over the queries at each step
+        metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
 
         # update population distributions for next iteration
+        mean_a[i], mean_b[i] = MEAN_A, MEAN_B
         MEAN_A += update_mean(np.mean(arr_a))
         MEAN_B += update_mean(np.mean(arr_b))
 
@@ -189,6 +198,12 @@ def main():
     plt.plot(np.arange(NUM_ITER), metric_a, color='C2', label=f'Group A {METRIC}')
     plt.plot(np.arange(NUM_ITER), metric_b, color='C0', label=f'Group B {METRIC}')
     plt.savefig(f'sim-figures/{METRIC}_{NUM_ITER}.png', dpi=72)
+
+    # plot the change in means over time
+    plt.cla()
+    plt.plot(np.arange(NUM_ITER), mean_a, color='C2', label=f'Group A mean')
+    plt.plot(np.arange(NUM_ITER), mean_b, color='C0', label=f'Group B mean')
+    plt.savefig(f'sim-figures/means_{NUM_ITER}.png', dpi=72)
 
 
 if __name__ == '__main__':
