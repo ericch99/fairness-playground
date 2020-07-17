@@ -190,8 +190,8 @@ def main():
     VAR_A = 1
     VAR_B = 1
     QUERY_LEN = 10
-    NUM_QUERIES = 10
-    NUM_ITER = 25
+    NUM_QUERIES = 50
+    NUM_ITER = 100
     # NUM_ITERS = [10, 25, 100]
     METRIC = 'avg_position'
     DIST = 'normal'
@@ -221,13 +221,13 @@ def main():
         # update population distributions for next iteration
         # keeping the sum the same
         mean_a[i], mean_b[i] = MEAN_A, MEAN_B
-        if abs(MEAN_B - MEAN_A) > 0.02:
+        if abs(MEAN_B - MEAN_A) > 0.01:
             if MEAN_B < MEAN_A:
-                MEAN_B += update_mean(np.mean(arr_b))
-                MEAN_A -= update_mean(np.mean(arr_b))
+                MEAN_B += update_mean(np.mean(arr_b)) / 2
+                MEAN_A -= update_mean(np.mean(arr_b)) / 2
             if MEAN_A < MEAN_B:
-                MEAN_A += update_mean(np.mean(arr_a))
-                MEAN_B -= update_mean(np.mean(arr_a))
+                MEAN_A += update_mean(np.mean(arr_a)) / 2
+                MEAN_B -= update_mean(np.mean(arr_a)) / 2
 
     # plot change in metric over time
     plt.plot(np.arange(NUM_ITER), metric_a, color='C2', label=f'Group A {METRIC}')
