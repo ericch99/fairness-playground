@@ -191,10 +191,12 @@ def main():
     VAR_B = 1
     QUERY_LEN = 10
     NUM_QUERIES = 10
-    NUM_ITER = 10
+    NUM_ITER = 25
+    # NUM_ITERS = [10, 25, 100]
     METRIC = 'avg_position'
     DIST = 'normal'
 
+    # for NUM_ITER in NUM_ITERS:
     metric_a, mean_a = np.empty(NUM_ITER), np.empty(NUM_ITER)
     metric_b, mean_b = np.empty(NUM_ITER), np.empty(NUM_ITER)
 
@@ -209,16 +211,23 @@ def main():
 
             # rank subjects according to chosen policy, compute metric
             # rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
-            rank_a, rank_b = rank_stoch(arr_a, arr_b)
+            rank_a, rank_b = rank_max_util(arr_a, arr_b)
+            # rank_a, rank_b = rank_stoch(arr_a, arr_b)
             a_metrics[j], b_metrics[j] = compute_metric(rank_a, rank_b, METRIC)
 
         # take the mean of the metrics over the queries at each step
         metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
 
         # update population distributions for next iteration
+        # keeping the sum the same
         mean_a[i], mean_b[i] = MEAN_A, MEAN_B
-        MEAN_A += update_mean(np.mean(arr_a))
-        MEAN_B += update_mean(np.mean(arr_b))
+        if abs(MEAN_B - MEAN_A) > 0.02:
+            if MEAN_B < MEAN_A:
+                MEAN_B += update_mean(np.mean(arr_b))
+                MEAN_A -= update_mean(np.mean(arr_b))
+            if MEAN_A < MEAN_B:
+                MEAN_A += update_mean(np.mean(arr_a))
+                MEAN_B -= update_mean(np.mean(arr_a))
 
     # plot change in metric over time
     plt.plot(np.arange(NUM_ITER), metric_a, color='C2', label=f'Group A {METRIC}')
