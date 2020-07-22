@@ -37,9 +37,9 @@ def rank_top_k(arr_a, arr_b, k, prob_a):
     k_a = int(k * prob_a)
     k_b = int(k * (1 - prob_a))
 
-    ranking = pd.concat(rank_max_util(arr_a[:k_a], arr_b[:k_b]), rank_max_util(arr_a[k_a:], arr_b[k_b:]))
-    for i in range(ranking.count):
-        ranking[i][0] = i + 1
+    ranking = rank_max_util(arr_a[:k_a], arr_b[:k_b]).append(rank_max_util(arr_a[k_a:], arr_b[k_b:]))
+    for i in range(len(ranking.index)):
+        ranking.iloc[i, ranking.columns.get_loc('rank')] = i + 1
 
     return ranking
 
