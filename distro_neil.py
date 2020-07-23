@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.stats import beta
 from scipy.stats import norm
-from scipy.special import softmax
 import matplotlib.pyplot as plt
 import random
 import seaborn as sns; sns.set(style='darkgrid')
@@ -19,7 +18,6 @@ TODO:
     - implement more fair ranking policies for comparison to max-util
     - only look at top-k for success/failure rates?
 """
-
 
 # DISTRIBUTIONS =========================================================
 
@@ -54,26 +52,26 @@ def sample_normal(mean, var, ql, prob):
 # METRICS ===============================================================
 
 
-def compute_metric(rank_a, rank_b, metric):
+def compute_metric(ranking, metric):
     """
     Computes chosen metric to track change over time.
     """
     if metric == 'avg_position':
-        return avg_position(rank_a, rank_b)
+        return avg_position(ranking)
     elif metric == 'avg_exposure':
-        return avg_exposure(rank_a, rank_b)
+        return avg_exposure(ranking)
     else:
         # TODO 
         pass
 
 
-def avg_position(rank_a, rank_b):
-    return np.mean(rank_a), np.mean(rank_b)
+def avg_position(ranking):
+    return ranking.groupby('group')['rank'].mean()
 
 
-def avg_exposure(rank_a, rank_b):
-    return 1 / math.log2(1 + avg_position(rank_a, rank_b)[0]), 1 / math.log2(1 + avg_position(rank_a, rank_b)[1])
-
+def avg_exposure(ranking):
+    # do we even need this?
+    return avg_position(ranking).assign(exposure=1 / math.log2(1 + avg_position(ranking)['rank']))['exposure']
 
 # ///////////////////////////////////////////////////////////////////////
 
@@ -83,6 +81,7 @@ def update_mean(mean):
     # should play more with changes in the mean
     delta = sig * 0.5 - (1 - sig) * 0.5
     return delta
+
 
 def main():
     PROB_A = 0.6
@@ -112,10 +111,12 @@ def main():
             arr_b = sample_dist(DIST, MEAN_B, VAR_B, QUERY_LEN, PROB_B)
 
             # rank subjects according to chosen policy, compute metric
-            # rank_a, rank_b = rank_top_k(arr_a, arr_b, 5, PROB_A)
-            rank_a, rank_b = rank_max_util(arr_a, arr_b)
-            # rank_a, rank_b = rank_stoch(arr_a, arr_b)
-            a_metrics[j], b_metrics[j] = compute_metric(rank_a, rank_b, METRIC)
+            # ranking = ranking_policies.rank_top_k_alt(arr_a, arr_b)
+            # ranking = ranking_policies.rank_max_util(arr_a, arr_b)
+            # ranking = ranking_policies.rank_top_k(arr_a, arr_b, 5, PROB_A)
+            ranking = ranking_policies.rank_stochastic(arr_a, arr_b)
+            a_metrics[j], b_metrics[j] = compute_metric(ranking, METRIC).loc['A'], \
+                                         compute_metric(ranking, METRIC).loc['B']
 
         # take the mean of the metrics over the queries at each step
         metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
@@ -123,6 +124,8 @@ def main():
         # update population distributions for next iteration
         # keeping the sum the same
         mean_a[i], mean_b[i] = MEAN_A, MEAN_B
+
+        # updating the means in a funny way, need to figure out top k way to do it
         if abs(MEAN_B - MEAN_A) > 0.01:
             if MEAN_B < MEAN_A:
                 MEAN_B += update_mean(np.mean(arr_b)) / 2
