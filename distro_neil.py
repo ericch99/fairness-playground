@@ -1,14 +1,11 @@
 import numpy as np
-from scipy.stats import beta
-from scipy.stats import norm
 import matplotlib.pyplot as plt
-import random
 import seaborn as sns; sns.set(style='darkgrid')
-import math
 
 from ranking_policies.py import *
 from selection_policies.py import *
-
+from metrics import *
+from distributions import *
 
 """
 TODO:
@@ -18,62 +15,6 @@ TODO:
     - implement more fair ranking policies for comparison to max-util
     - only look at top-k for success/failure rates?
 """
-
-# DISTRIBUTIONS =========================================================
-
-def sample_dist(dist, mean, var, ql, prob):
-    """
-    Returns length-(QUERY_LEN * prob) list of relevances (in decreasing order) 
-    as sampled from a chosen distribution with specified mean and variance
-    """
-    if dist == 'beta':
-        return sample_beta(mean, var, ql, prob)
-    elif dist == 'normal':
-        return sample_normal(mean, var, ql, prob)
-    else:
-        # TODO
-        pass
-
-
-def sample_beta(mean, var, ql, prob):
-    a = (((1 - mean) / var) - (1 / mean)) * (mean ** 2)
-    b = a * ((1 / mean) - 1)
-    arr = np.array(beta.rvs(a, b, size=int(ql * prob)))
-    return np.sort(arr)[::-1]
-
-
-def sample_normal(mean, var, ql, prob):
-    arr = np.array(norm.rvs(loc=mean, scale=var, size=int(ql * prob)))
-    return np.sort(arr)[::-1]
-
-
-# ///////////////////////////////////////////////////////////////////////
-
-# METRICS ===============================================================
-
-
-def compute_metric(ranking, metric):
-    """
-    Computes chosen metric to track change over time.
-    """
-    if metric == 'avg_position':
-        return avg_position(ranking)
-    elif metric == 'avg_exposure':
-        return avg_exposure(ranking)
-    else:
-        # TODO 
-        pass
-
-
-def avg_position(ranking):
-    return ranking.groupby('group')['rank'].mean()
-
-
-def avg_exposure(ranking):
-    # do we even need this?
-    return avg_position(ranking).assign(exposure=1 / math.log2(1 + avg_position(ranking)['rank']))['exposure']
-
-# ///////////////////////////////////////////////////////////////////////
 
 
 def update_mean(mean):

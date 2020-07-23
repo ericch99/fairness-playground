@@ -3,13 +3,13 @@ import pandas as pd
 import random
 from scipy.special import softmax
 
-# TODO: not debugged yet
+# RANKING POLICIES ======================================================
 
+# TODO: not debugged yet
 
 # ASSUMPTION: underlying population is p% Group A and (1-p)% Group B, 
 # and we want the rankings to accurately reflect those proportions
-
-# from Eric: looks good, but we may want to alter this to work for different proportions (right now just works for 50-50)
+#   - addendum: may want to generalize past 50-50 population proportions
 
 def rank_top_k_alt(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])

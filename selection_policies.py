@@ -42,13 +42,14 @@ def select_stochastic(ranking, k):
 		- stop when we have k selected or reach the bottom of the list
 	Each selected individual then succeeds with probability of success equal to logit(relevance).
 	"""
+	
 	count = 0
 	pos = 1
 	selected = []
 
 	# selection
 	while count < k and pos - 1 < ranking.shape[0]:
-		trial = bernoulli.rvs(1 / math.log(1 + pos), 2)
+		trial = bernoulli.rvs(1 / math.log2(1 + pos))
 		if trial == 1:
 			count += 1
 		
