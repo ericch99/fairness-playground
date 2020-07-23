@@ -3,8 +3,13 @@ import pandas as pd
 import random
 from scipy.special import softmax
 
-# not debugged yet
+# TODO: not debugged yet
 
+
+# ASSUMPTION: underlying population is p% Group A and (1-p)% Group B, 
+# and we want the rankings to accurately reflect those proportions
+
+# from Eric: looks good, but we may want to alter this to work for different proportions (right now just works for 50-50)
 
 def rank_top_k_alt(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
@@ -32,6 +37,9 @@ def rank_top_k_alt(arr_a, arr_b):
     return ranking
 
 
+# TODO ===========================================================================================
+# do we need to keep this?
+
 def rank_top_k(arr_a, arr_b, k, prob_a):
     # round k to nearest integers
     k_a = int(k * prob_a)
@@ -43,6 +51,7 @@ def rank_top_k(arr_a, arr_b, k, prob_a):
 
     return ranking
 
+# END TODO ///////////////////////////////////////////////////////////////////////////////////////
 
 def rank_max_util(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
@@ -66,6 +75,9 @@ def rank_max_util(arr_a, arr_b):
 
     return ranking
 
+
+# TODO:
+#   - talk to Amanda (and Alex) about how we should do this!
 
 def rank_stochastic(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])

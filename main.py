@@ -4,10 +4,12 @@ from scipy.stats import norm
 from scipy.special import softmax
 import matplotlib.pyplot as plt
 import random
-import seaborn as sns
+import seaborn as sns; sns.set(style='darkgrid')
 import math
 
-sns.set(style='darkgrid')
+from ranking_policies.py import *
+from selection_policies.py import *
+
 
 """
 TODO:
@@ -19,107 +21,7 @@ TODO:
 """
 
 
-# RANKING POLICIES =====================================================
-
-
-def rank_top_k(arr_a, arr_b, k, prob_a):
-    """
-    Returns optimal ranking as measured by NDCG and 
-    subject to top-k demographic parity constraint; 
-    returns rankings for subgroups separately.
-    """
-    # round k to nearest integers
-    k_a = int(k * prob_a)
-    k_b = int(k * (1 - prob_a))
-    k = k_a + k_b
-
-    a, b = 0, 0
-    rank_a, rank_b = arr_a, arr_b
-
-    # rank top k subjects subject to demographic parity constraint 
-    while a < k_a and b < k_b:
-        if arr_a[a] > arr_b[b]:
-            rank_a[a] = a + b + 1
-            a += 1
-        else:
-            rank_b[b] = a + b + 1
-            b += 1
-
-    # get the leftovers (top k)
-    while a < k_a:
-        rank_a[a] = a + b + 1
-        a += 1
-    while b < k_b:
-        rank_b[b] = a + b + 1
-        b += 1
-
-    # rank remaining subjects by max-util strategy
-    remain_a, remain_b = rank_max_util(arr_a[a:], arr_b[b:])
-    # for s_a in remain_a:
-    rank_a = np.append(rank_a, [s_a + k for s_a in remain_a])
-    # for s_b in remain_b:
-    rank_b = np.append(rank_b, [s_b + k for s_b in remain_b])
-
-    return rank_a, rank_b
-
-
-def rank_max_util(arr_a, arr_b):
-    """
-    Returns optimal ranking as measured by NDCG; 
-    equivalent to ranking in order of relevance.
-    """
-    a, b = 0, 0
-    rank_a, rank_b = arr_a, arr_b
-
-    while a < len(arr_a) and b < len(arr_b):
-        if arr_a[a] > arr_b[b]:
-            rank_a[a] = a + b + 1
-            a = a + 1
-        else:
-            rank_b[b] = a + b + 1
-            b = b + 1
-
-    # get the leftovers
-    while a < len(arr_a):
-        rank_a[a] = a + b + 1
-        a = a + 1
-    while b < len(arr_b):
-        rank_b[b] = a + b + 1
-        b = b + 1
-
-    return rank_a, rank_b
-
-
-def rank_stoch(arr_a, arr_b):
-    rank_a, rank_b = np.empty(len(arr_a)), np.empty(len(arr_b))
-    a, b = 0, 0
-
-    s = softmax(np.append(arr_a, arr_b))
-
-    while len(arr_a) > 0 or len(arr_b) > 0:
-        s = softmax(np.append(arr_a, arr_b))
-        rand = random.uniform(0, 1)
-        summer = 0
-        for i in range(len(s)):
-            summer += s[i]
-            if rand < summer:
-                if i in range(0, len(arr_a)):
-                    rank_a[a] = a + b + 1
-                    a += 1
-                    arr_a = np.delete(arr_a, [i])
-                else:
-                    rank_b[b] = a + b + 1
-                    b += 1
-                    arr_b = np.delete(arr_b, [i - len(arr_a)])
-                break
-
-    return rank_a, rank_b
-
-
-# ///////////////////////////////////////////////////////////////////////
-
 # DISTRIBUTIONS =========================================================
-
 
 def sample_dist(dist, mean, var, ql, prob):
     """
