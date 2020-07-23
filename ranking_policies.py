@@ -8,6 +8,7 @@ from scipy.special import softmax
 
 def rank_top_k_alt(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
+    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
     a, b = 0, 0
 
     while a < len(arr_a) and b < len(arr_b):
@@ -46,6 +47,7 @@ def rank_top_k(arr_a, arr_b, k, prob_a):
 
 def rank_max_util(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
+    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
     a, b = 0, 0
 
     while a < len(arr_a) and b < len(arr_b):
@@ -69,6 +71,7 @@ def rank_max_util(arr_a, arr_b):
 
 def rank_stochastic(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
+    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
     a, b = 0, 0
 
     while len(arr_a) > 0 or len(arr_b) > 0:
