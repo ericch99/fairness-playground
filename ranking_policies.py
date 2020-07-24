@@ -3,8 +3,6 @@ import pandas as pd
 import random
 from scipy.special import softmax
 
-# not debugged yet
-
 
 def rank_top_k_alt(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
