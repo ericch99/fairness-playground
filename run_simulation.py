@@ -3,12 +3,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns; sns.set(style='darkgrid')
 import math
 
-# from ranking_policies.py import *
-# from selection_policies.py import *
+from ranking_policies import *
+from selection_policies import *
 from metrics import *
 from distributions import *
-import ranking_policies
-import selection_policies
 
 """
 TODO:
@@ -76,7 +74,7 @@ def main():
     # for RANK_POLICY in RANKING_POLICIES:
     # for SELECT_POLICY in SELECTION_POLICIES:
     # for NUM_ITER in NUM_ITERS:
-    
+
     metric_a, mean_a = np.empty(NUM_ITER), np.empty(NUM_ITER)
     metric_b, mean_b = np.empty(NUM_ITER), np.empty(NUM_ITER)
 
