@@ -6,6 +6,7 @@ from scipy.special import logit
 
 # SELECTION POLICIES ====================================================
 
+
 def select_top_k(ranking, k):
 	"""
 	Method 1 (deterministic):

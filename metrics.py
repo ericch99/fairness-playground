@@ -3,6 +3,7 @@ import math
 
 # METRICS ===============================================================
 
+
 def compute_metric(ranking, metric):
     """
     Computes chosen metric to track change over time.
@@ -22,5 +23,5 @@ def avg_position(ranking):
 
 def avg_exposure(ranking):
     # do we even need this?
-    return avg_position(ranking).assign(exposure = 1 / math.log2(1 + avg_position(ranking)['rank']))['exposure']
+    return avg_position(ranking).assign(exposure=1 / math.log2(1 + avg_position(ranking)['rank']))['exposure']
 

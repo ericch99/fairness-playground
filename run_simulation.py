@@ -9,7 +9,6 @@ from distributions import *
 
 """
 TODO:
-    - should stop changing distributions once means converge...
     - need to incorporate NDCG in fair rankings
         * NDCG vs. exposure?
     - implement more fair ranking policies for comparison to max-util
