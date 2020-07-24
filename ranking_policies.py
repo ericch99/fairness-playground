@@ -6,8 +6,6 @@ from scipy.special import softmax
 
 # RANKING POLICIES ======================================================
 
-# TODO: not debugged yet
-
 # ASSUMPTION: underlying population is p% Group A and (1-p)% Group B, 
 # and we want the rankings to accurately reflect those proportions
 #   - addendum: may want to generalize past 50-50 population proportions
@@ -39,8 +37,8 @@ def rank_top_k_alt(arr_a, arr_b):
     return ranking
 
 
-### BEGIN TODO //////////////////////////////////////////////////////////////////////////////////////
-### DO WE NEED TO KEEP THIS?
+# BEGIN TODO ///////////////////////////////////////////////////////////////////////////////////////////
+# DO WE NEED TO KEEP THIS?
 
 # def rank_top_k(arr_a, arr_b, k, prob_a):
 #     # round k to nearest integers
@@ -53,7 +51,7 @@ def rank_top_k_alt(arr_a, arr_b):
 
 #     return ranking
 
-### END TODO ///////////////////////////////////////////////////////////////////////////////////////
+# END TODO ////////////////////////////////////////////////////////////////////////////////////////////
 
 
 def rank_max_util(arr_a, arr_b):
