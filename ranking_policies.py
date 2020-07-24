@@ -4,13 +4,33 @@ import random
 from scipy.special import softmax
 
 
-# RANKING POLICIES ======================================================
+def rank_policy(arr_a, arr_b, policy):
+    if policy == 'top-k':
+        return rank_top_k(arr_a, arr_b)
+    elif policy == 'max-util':
+        return rank_max_util(arr_a, arr_b)
+    else:
+        # TODO
+        pass
+
 
 # ASSUMPTION: underlying population is p% Group A and (1-p)% Group B, 
 # and we want the rankings to accurately reflect those proportions
 #   - addendum: may want to generalize past 50-50 population proportions
 
-def rank_top_k_alt(arr_a, arr_b):
+
+# RANKING POLICIES =============================================================================================
+
+
+# ASSUMPTION: 
+#   - underlying population (NOT representation in training data!) is p% Group A and 
+#     (1-p)% Group B, and we want the rankings to accurately reflect those proportions
+
+# TODO:
+#   - limited to 50-50 population proportions right now
+#   - we may want to add a k parameter into the function
+
+def rank_top_k(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
     ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
     a, b = 0, 0
@@ -40,16 +60,19 @@ def rank_top_k_alt(arr_a, arr_b):
 # BEGIN TODO ///////////////////////////////////////////////////////////////////////////////////////////
 # DO WE NEED TO KEEP THIS?
 
-# def rank_top_k(arr_a, arr_b, k, prob_a):
-#     # round k to nearest integers
-#     k_a = int(k * prob_a)
-#     k_b = int(k * (1 - prob_a))
+"""
+def rank_top_k(arr_a, arr_b, k, prob_a):
+    # round k to nearest integers
+    k_a = int(k * prob_a)
+    k_b = int(k * (1 - prob_a))
 
-#     ranking = rank_max_util(arr_a[:k_a], arr_b[:k_b]).append(rank_max_util(arr_a[k_a:], arr_b[k_b:]))
-#     for i in range(len(ranking.index)):
-#         ranking.iloc[i, ranking.columns.get_loc('rank')] = i + 1
+    ranking = rank_max_util(arr_a[:k_a], arr_b[:k_b]).append(rank_max_util(arr_a[k_a:], arr_b[k_b:]))
+    for i in range(len(ranking.index)):
+        ranking.iloc[i, ranking.columns.get_loc('rank')] = i + 1
 
-#     return ranking
+    return ranking
+"""
+
 
 # END TODO ////////////////////////////////////////////////////////////////////////////////////////////
 

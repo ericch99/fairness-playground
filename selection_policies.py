@@ -3,8 +3,18 @@ import pandas as pd
 import math
 from scipy.stats import bernoulli
 
-# SELECTION POLICIES ====================================================
 
+def select_policy(ranking, k, policy):
+	if policy == 'top-k':
+		return select_top_k(ranking, k)
+	elif policy == 'stochastic':
+		return select_stochastic(ranking, k)
+	else:
+		# TODO
+		pass
+
+
+# SELECTION POLICIES =====================================================================
 
 def select_top_k(ranking, k):
 	"""
@@ -36,10 +46,10 @@ def select_stochastic(ranking, k):
 	"""
 	Method 2 (stochastic):
 	Selects k subjects in the following manner:
-		- starting at the top-ranked subject (index 0), decide whether to select them based on position bias
-			* we'll use a log discounting click models: 1 / log_2(1 + i)
+		- starting at the top-ranked subject (index 0), select them with probability based on position bias
+			* we'll use a log discounting "click model": 1 / log_2(1 + i) for i = 1, 2, 3, ...
 		- if not selected, move down a rank and "click on" the next subject
-		- stop when we have k selected or reach the bottom of the list
+		- stop when we have k selected subjects or reach the bottom of the list
 	Each selected individual then succeeds with probability of success equal to relevance.
 	"""
 	
