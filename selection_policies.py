@@ -38,7 +38,7 @@ def select_stochastic(ranking, k):
 	Selects k subjects in the following manner:
 		- starting at the top-ranked subject (index 0), decide whether to select them based on position bias
 			* we'll use a log discounting click models: 1 / log_2(1 + i)
-		- if not selected, move down a rank and test the next subject
+		- if not selected, move down a rank and "click on" the next subject
 		- stop when we have k selected or reach the bottom of the list
 	Each selected individual then succeeds with probability of success equal to relevance.
 	"""
