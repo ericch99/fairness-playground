@@ -49,6 +49,7 @@ def update_mean(ranking):
 
 
 def main():
+    # initialize constants =================================================================
     PROB_A = 0.6
     PROB_B = 1 - PROB_A
 
@@ -59,23 +60,23 @@ def main():
     
     QUERY_LEN = 10
     NUM_QUERIES = 25
-    NUM_ITER = 25
-    # NUM_ITERS = [10, 25, 100]
 
-    METRIC = 'avg_position'
-    DIST = 'logit_normal'
+    METRIC = 'avg-position'
+    DIST = 'logit-normal'
     k = 10
 
     # NUM_ITERS = [10, 25, 100]
-    NUM_ITER = 100 
     # RANKING_POLICIES = ['top-k', 'max-util', 'stochastic']
-    RANKING_POLICY = 'top-k'
     # SELECTION_POLICIES = ['top-k', 'stochastic']
+    NUM_ITER = 25
+    RANKING_POLICY = 'top-k'    
     SELECTION_POLICY = 'stochastic'
 
+    # run simulation ======================================================================
     # for RANK_POLICY in RANKING_POLICIES:
     # for SELECT_POLICY in SELECTION_POLICIES:
     # for NUM_ITER in NUM_ITERS:
+    
     metric_a, mean_a = np.empty(NUM_ITER), np.empty(NUM_ITER)
     metric_b, mean_b = np.empty(NUM_ITER), np.empty(NUM_ITER)
 
@@ -97,27 +98,14 @@ def main():
 
             outcome = selection_policies.select_top_k(ranking, 5)
             deltas_a[j], deltas_b[j] = update_mean(outcome)
-            
-# ////////////////////////////////////////// TODO LATER //////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         # take the mean of the metrics over the queries at each step
         metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
 
-        # update population distributions for next iteration
-        # keeping the sum the same
+        # update population distributions for next iteration, keeping the sum the same
         mean_a[i], mean_b[i] = MEAN_A, MEAN_B
         MEAN_A += np.mean(deltas_a) / 2
         MEAN_B += np.mean(deltas_b)
-
-        # # updating the means in a funny way, need to figure out top k way to do it
-        # if abs(MEAN_B - MEAN_A) > 0.01:
-        #     if MEAN_B < MEAN_A:
-        #         MEAN_B += update_mean(np.mean(arr_b)) / 2
-        #         MEAN_A -= update_mean(np.mean(arr_b)) / 2
-        #     if MEAN_A < MEAN_B:
-        #         MEAN_A += update_mean(np.mean(arr_a)) / 2
-        #         MEAN_B -= update_mean(np.mean(arr_a)) / 2
 
     # plot change in metric over time
     plt.plot(np.arange(NUM_ITER), metric_a, color='C2', label=f'Group A {METRIC}')
@@ -129,9 +117,6 @@ def main():
     plt.plot(np.arange(NUM_ITER), mean_a, color='C2', label=f'Group A mean')
     plt.plot(np.arange(NUM_ITER), mean_b, color='C0', label=f'Group B mean')
     plt.savefig(f'sim-figures-{POLICY}/means_{NUM_ITER}.png', dpi=72)
-
-# ////////////////////////////////////////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 if __name__ == '__main__':
