@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import math
 from scipy.stats import bernoulli
-from scipy.special import logit
 
 # SELECTION POLICIES ====================================================
 
@@ -11,7 +10,7 @@ def select_top_k(ranking, k):
 	"""
 	Method 1 (deterministic):
 	Selects top-k subjects as measured by the given ranking.
-	Each selected individual then succeeds with probability of success equal to logit(relevance).
+	Each selected individual then succeeds with probability of success equal to relevance.
 	"""
 
 	# selection
@@ -22,7 +21,7 @@ def select_top_k(ranking, k):
 
 	# testing for success ('interviews')
 	for i in range(k):
-		trial = bernoulli.rvs(logit(ranking.iloc[i]['relevance']))
+		trial = bernoulli.rvs(ranking.iloc[i]['relevance'])
 		succeeded.append(trial)
 
 	succeeded.extend([0 for i in range(ranking.shape[0] - k)])
@@ -41,7 +40,7 @@ def select_stochastic(ranking, k):
 			* we'll use log discounting: 1 / log_2(1 + i)
 		- if not selected, move down a rank and test the next subject
 		- stop when we have k selected or reach the bottom of the list
-	Each selected individual then succeeds with probability of success equal to logit(relevance).
+	Each selected individual then succeeds with probability of success equal to relevance.
 	"""
 	
 	count = 0
@@ -65,7 +64,7 @@ def select_stochastic(ranking, k):
 	succeeded = np.zeros(ranking.shape[0])
 
 	for i in [i for i, x in enumerate(selected) if x == 1]:
-		trial = bernoulli.rvs(logit(ranking.iloc[i]['relevance']))
+		trial = bernoulli.rvs(ranking.iloc[i]['relevance'])
 		succeeded[i] = trial
 
 	ranking['succeeded'] = succeeded

@@ -35,7 +35,7 @@ def main():
     NUM_ITER = 100
     # NUM_ITERS = [10, 25, 100]
     METRIC = 'avg_position'
-    DIST = 'normal'
+    DIST = 'logit_normal'
 
     # for NUM_ITER in NUM_ITERS:
     metric_a, mean_a = np.empty(NUM_ITER), np.empty(NUM_ITER)

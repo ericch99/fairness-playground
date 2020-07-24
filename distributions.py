@@ -7,13 +7,13 @@ from scipy.stats import norm
 
 def sample_dist(dist, mean, var, ql, prob):
     """
-    Returns length-(QUERY_LEN * prob) list of relevances (in decreasing order) 
+    Returns length-(ql * prob) list of relevances (in decreasing order) 
     as sampled from a chosen distribution with specified mean and variance
     """
     if dist == 'beta':
         return sample_beta(mean, var, ql, prob)
-    elif dist == 'normal':
-        return sample_normal(mean, var, ql, prob)
+    elif dist == 'logit_normal':
+        return sample_logit_normal(mean, var, ql, prob)
     else:
         # TODO
         pass
@@ -26,6 +26,7 @@ def sample_beta(mean, var, ql, prob):
     return np.sort(arr)[::-1]
 
 
-def sample_normal(mean, var, ql, prob):
-    arr = np.array(norm.rvs(loc=mean, scale=var, size=int(ql * prob)))
+def sample_logit_normal(mean, var, ql, prob):
+    x = np.array(norm.rvs(loc=mean, scale=var, size=int(ql * prob)))
+    arr = 1 / (1 + np.exp(-x))
     return np.sort(arr)[::-1]
