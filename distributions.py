@@ -3,21 +3,21 @@ from scipy.stats import beta
 from scipy.stats import norm
 
 
-# DISTRIBUTIONS =========================================================
-
-def sample_dist(dist, mean, var, ql, prob):
+def sample_dist(mean, var, ql, prob, dist):
     """
     Returns length-(ql * prob) list of relevances (in decreasing order) 
     as sampled from a chosen distribution with specified mean and variance
     """
     if dist == 'beta':
         return sample_beta(mean, var, ql, prob)
-    elif dist == 'logit_normal':
+    elif dist == 'logit-normal':
         return sample_logit_normal(mean, var, ql, prob)
     else:
         # TODO
         pass
 
+
+# DISTRIBUTIONS =========================================================
 
 def sample_beta(mean, var, ql, prob):
     a = (((1 - mean) / var) - (1 / mean)) * (mean ** 2)

@@ -3,8 +3,18 @@ import pandas as pd
 import math
 from scipy.stats import bernoulli
 
-# SELECTION POLICIES ====================================================
 
+def select_policy(ranking, k, policy):
+	if policy == 'top-k':
+		return select_top_k(ranking, k)
+	elif policy == 'stochastic':
+		return select_stochastic(ranking, k)
+	else:
+		# TODO
+		pass
+
+
+# SELECTION POLICIES =====================================================================
 
 def select_top_k(ranking, k):
 	"""
