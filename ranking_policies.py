@@ -4,9 +4,10 @@ import random
 from scipy.special import softmax
 
 
-def rank_policy(arr_a, arr_b, policy):
+def rank_policy(arr_a, arr_b, policy, **kwargs):
     if policy == 'top-k':
-        return rank_top_k(arr_a, arr_b)
+        k = kwargs['k'] 
+        return rank_top_k(arr_a, arr_b, k)
     elif policy == 'max-util':
         return rank_max_util(arr_a, arr_b)
     else:
@@ -23,9 +24,8 @@ def rank_policy(arr_a, arr_b, policy):
 
 # TODO:
 #   - limited to 50-50 population proportions right now
-#   - we may want to add a k parameter into the function
 
-def rank_top_k(arr_a, arr_b):
+def rank_top_k(arr_a, arr_b, k):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
     ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
     a, b = 0, 0
