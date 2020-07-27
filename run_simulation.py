@@ -9,11 +9,9 @@ from metrics import *
 from distributions import *
 
 """
-TODO:
-    - need to incorporate NDCG in fair rankings
-        * NDCG vs. exposure?
-    - implement more fair ranking policies for comparison to max-util
-    - only look at top-k for success/failure rates?
+NOTES:
+    - treat Group B as the protected class
+    - 
 """
 
 
