@@ -1,12 +1,12 @@
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set(style='darkgrid')
-import math
 
+from distributions import *
+from metrics import *
 from ranking_policies import *
 from selection_policies import *
-from metrics import *
-from distributions import *
 
 """
 NOTES:
