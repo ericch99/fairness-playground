@@ -54,19 +54,19 @@ def main():
     VAR_A = 1
     VAR_B = 1
     
-    QUERY_LEN = 10
-    NUM_QUERIES = 25
+    QUERY_LEN = 20
+    NUM_QUERIES = 10
 
     METRIC = 'avg-position'
     DIST = 'logit-normal'
-    k = 10
+    k = 8
 
     # NUM_ITERS = [10, 25, 100]
     # RANKING_POLICIES = ['top-k', 'max-util', 'stochastic']
     # SELECTION_POLICIES = ['top-k', 'stochastic']
-    NUM_ITER = 25
-    RANKING_POLICY = 'top-k'    
-    SELECTION_POLICY = 'stochastic'
+    NUM_ITER = 10
+    RANK_POLICY = 'top-k'
+    SELECT_POLICY = 'stochastic'
 
     # run simulation ======================================================================
     # for RANK_POLICY in RANKING_POLICIES:
@@ -86,14 +86,14 @@ def main():
             arr_b = sample_dist(MEAN_B, VAR_B, QUERY_LEN, PROB_B, DIST)
 
             # rank subjects according to chosen policy, select individuals
-            ranking = rank_policy(arr_a, arr_b, RANK_POLICY)
+            ranking = rank_policy(arr_a, arr_b, RANK_POLICY, k=QUERY_LEN, p=PROB_A)
             result = select_policy(ranking, k, SELECT_POLICY)
 
             a_metrics[j], b_metrics[j] = compute_metric(ranking, METRIC).loc['A'], \
                                          compute_metric(ranking, METRIC).loc['B']
 
-            outcome = selection_policies.select_top_k(ranking, 5)
-            deltas_a[j], deltas_b[j] = update_mean(outcome)
+            # outcome = selection_policies.select_top_k(ranking, 5)
+            deltas_a[j], deltas_b[j] = update_mean(result)
 
 # ////////////////////////////////////////// TODO LATER //////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,19 +103,19 @@ def main():
 
         # update population distributions for next iteration, keeping the sum the same
         mean_a[i], mean_b[i] = MEAN_A, MEAN_B
-        MEAN_A += np.mean(deltas_a) / 2
+        MEAN_A += np.mean(deltas_a)
         MEAN_B += np.mean(deltas_b)
 
     # plot change in metric over time
     plt.plot(np.arange(NUM_ITER), metric_a, color='C2', label=f'Group A {METRIC}')
     plt.plot(np.arange(NUM_ITER), metric_b, color='C0', label=f'Group B {METRIC}')
-    plt.savefig(f'sim-figures-{POLICY}/{METRIC}_{NUM_ITER}.png', dpi=72)
+    plt.savefig(f'sim-figures-{SELECT_POLICY}/{METRIC}_{NUM_ITER}.png', dpi=72)
 
     # plot the change in means over time
     plt.cla()
     plt.plot(np.arange(NUM_ITER), mean_a, color='C2', label=f'Group A mean')
     plt.plot(np.arange(NUM_ITER), mean_b, color='C0', label=f'Group B mean')
-    plt.savefig(f'sim-figures-{POLICY}/means_{NUM_ITER}.png', dpi=72)
+    plt.savefig(f'sim-figures-{SELECT_POLICY}/means_{NUM_ITER}.png', dpi=72)
 
 
 if __name__ == '__main__':
