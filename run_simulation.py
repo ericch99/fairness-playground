@@ -16,6 +16,12 @@ NOTES:
 """
 
 
+def update_mean_new(ranking):
+    ranking['delta'] = [0.5 if (row.selected and row.succeeded) else (-0.25 if row.selected else 0) for row in ranking.itertuples()]
+    ranking = ranking.groupby('group').mean()['delta']
+    return ranking['A'], ranking['B']
+
+
 def update_mean(ranking):
     ranking = ranking.groupby(['group', 'selected', 'succeeded']).count()['rank']
     ranking = ranking.unstack().unstack()
@@ -51,8 +57,8 @@ def main():
     PROB_A = 0.6
     PROB_B = 1 - PROB_A
 
-    MEAN_A = 1.5
-    MEAN_B = -1.5
+    MEAN_A = 1
+    MEAN_B = 0
     VAR_A = 1
     VAR_B = 1
     
@@ -61,7 +67,7 @@ def main():
 
     METRIC = 'avg-position'
     DIST = 'logit-normal'
-    k = 8
+    k = 6
 
     # NUM_ITERS = [10, 25, 100]
     # RANKING_POLICIES = ['top-k', 'max-util', 'stochastic']
@@ -91,7 +97,7 @@ def main():
             arr_b = sample_dist(MEAN_B, VAR_B, QUERY_LEN, PROB_B, DIST)
 
             # rank subjects according to chosen policy, select individuals
-            ranking = rank_policy(arr_a, arr_b, RANK_POLICY, k=QUERY_LEN, p=PROB_A)
+            ranking = rank_policy(arr_a, arr_b, RANK_POLICY, k=k, p=PROB_A)
             result = select_policy(ranking, k, SELECT_POLICY)
 
             # compute chosen fairness metric 
@@ -99,7 +105,7 @@ def main():
                                          compute_metric(ranking, METRIC).loc['B']
 
             # compute change in population distributions 
-            deltas_a[j], deltas_b[j] = update_mean(result)
+            deltas_a[j], deltas_b[j] = update_mean_new(result)
 
         # take the mean of the metrics over the queries at each step
         metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
@@ -116,8 +122,8 @@ def main():
 
     # plot the change in means over time
     plt.cla()
-    plt.plot(np.arange(NUM_ITER), mean_a, color='C2', label=f'Group A mean')
-    plt.plot(np.arange(NUM_ITER), mean_b, color='C0', label=f'Group B mean')
+    plt.plot(np.arange(NUM_ITER), 1 / (1 + np.exp(-mean_a)), color='C2', label=f'Group A mean')
+    plt.plot(np.arange(NUM_ITER), 1 / (1 + np.exp(-mean_b)), color='C0', label=f'Group B mean')
     plt.savefig(f'sim-figures-{SELECT_POLICY}/means_{NUM_ITER}.png', dpi=72)
 
 
