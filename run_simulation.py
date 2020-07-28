@@ -2,6 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set(style='darkgrid')
+from tqdm import trange
 
 from distributions import *
 from metrics import *
@@ -46,6 +47,7 @@ def update_mean(ranking):
 
 def main():
     # initialize constants =================================================================
+
     PROB_A = 0.6
     PROB_B = 1 - PROB_A
 
@@ -69,6 +71,7 @@ def main():
     SELECT_POLICY = 'stochastic'
 
     # run simulation ======================================================================
+
     # for RANK_POLICY in RANKING_POLICIES:
     # for SELECT_POLICY in SELECTION_POLICIES:
     # for NUM_ITER in NUM_ITERS:
@@ -76,12 +79,14 @@ def main():
     metric_a, mean_a = np.empty(NUM_ITER), np.empty(NUM_ITER)
     metric_b, mean_b = np.empty(NUM_ITER), np.empty(NUM_ITER)
 
-    for i in range(NUM_ITER):
+    # ITERATIONS: length of time horizon
+    for i in trange(NUM_ITER, desc='iterations'):
         a_metrics, deltas_a = np.empty(NUM_QUERIES), np.empty(NUM_QUERIES)
         b_metrics, deltas_b = np.empty(NUM_QUERIES), np.empty(NUM_QUERIES)
 
-        for j in range(NUM_QUERIES):
-            # sample QUERY_LEN subjects from underlying distribution
+        # QUERIES: number of simulations per time step
+        for j in trange(NUM_QUERIES, desc='queries'):
+            # sample subjects from underlying distribution
             arr_a = sample_dist(MEAN_A, VAR_A, QUERY_LEN, PROB_A, DIST)
             arr_b = sample_dist(MEAN_B, VAR_B, QUERY_LEN, PROB_B, DIST)
 
@@ -89,17 +94,12 @@ def main():
             ranking = rank_policy(arr_a, arr_b, RANK_POLICY, k=QUERY_LEN, p=PROB_A)
             result = select_policy(ranking, k, SELECT_POLICY)
 
+            # compute chosen fairness metric 
             a_metrics[j], b_metrics[j] = compute_metric(ranking, METRIC).loc['A'], \
                                          compute_metric(ranking, METRIC).loc['B']
 
-            # outcome = selection_policies.select_top_k(ranking, 5)
+            # compute change in population distributions 
             deltas_a[j], deltas_b[j] = update_mean(result)
-            # outcome = select_top_k(ranking, 5)
-            deltas_a[j], deltas_b[j] = update_mean(result)
-
-
-# ////////////////////////////////////////// TODO LATER //////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         # take the mean of the metrics over the queries at each step
         metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
