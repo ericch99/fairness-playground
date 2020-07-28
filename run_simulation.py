@@ -94,6 +94,9 @@ def main():
 
             # outcome = selection_policies.select_top_k(ranking, 5)
             deltas_a[j], deltas_b[j] = update_mean(result)
+            # outcome = select_top_k(ranking, 5)
+            deltas_a[j], deltas_b[j] = update_mean(result)
+
 
 # ////////////////////////////////////////// TODO LATER //////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////
