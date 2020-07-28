@@ -16,13 +16,15 @@ NOTES:
 """
 
 
-def update_mean_new(ranking):
-    ranking['delta'] = [0.5 if (row.selected and row.succeeded) else (-0.25 if row.selected else 0) for row in ranking.itertuples()]
+def update_mean(ranking):
+    ranking['delta'] = [0.5 if (row.selected and row.succeeded) 
+                        else (-0.25 if row.selected else 0) 
+                        for row in ranking.itertuples()]
     ranking = ranking.groupby('group').mean()['delta']
     return ranking['A'], ranking['B']
 
 
-def update_mean(ranking):
+def update_mean_alt(ranking):
     ranking = ranking.groupby(['group', 'selected', 'succeeded']).count()['rank']
     ranking = ranking.unstack().unstack()
 
@@ -105,7 +107,7 @@ def main():
                                          compute_metric(ranking, METRIC).loc['B']
 
             # compute change in population distributions 
-            deltas_a[j], deltas_b[j] = update_mean_new(result)
+            deltas_a[j], deltas_b[j] = update_mean(result)
 
         # take the mean of the metrics over the queries at each step
         metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
@@ -120,11 +122,11 @@ def main():
     plt.plot(np.arange(NUM_ITER), metric_b, color='C0', label=f'Group B {METRIC}')
     plt.savefig(f'sim-figures-{SELECT_POLICY}/{METRIC}_{NUM_ITER}.png', dpi=72)
 
-    # plot the change in means over time
+    # plot the change in relevance over time
     plt.cla()
     plt.plot(np.arange(NUM_ITER), 1 / (1 + np.exp(-mean_a)), color='C2', label=f'Group A mean')
     plt.plot(np.arange(NUM_ITER), 1 / (1 + np.exp(-mean_b)), color='C0', label=f'Group B mean')
-    plt.savefig(f'sim-figures-{SELECT_POLICY}/means_{NUM_ITER}.png', dpi=72)
+    plt.savefig(f'sim-figures-{SELECT_POLICY}/relevance_{NUM_ITER}.png', dpi=72)
 
 
 if __name__ == '__main__':
