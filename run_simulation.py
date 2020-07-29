@@ -24,35 +24,6 @@ def update_mean(ranking):
     return ranking['A'], ranking['B']
 
 
-def update_mean_alt(ranking):
-    ranking = ranking.groupby(['group', 'selected', 'succeeded']).count()['rank']
-    ranking = ranking.unstack().unstack()
-
-    if not math.isnan(ranking.iloc[0, 2]) and not math.isnan(ranking.iloc[0, 3]):
-        delta_a = (ranking.iloc[0, 3] - ranking.iloc[0, 2]) / \
-                  (ranking.iloc[0, 3] + ranking.iloc[0, 2])
-    else:
-        if not math.isnan(ranking.iloc[0, 3]):
-            delta_a = 1
-        elif not math.isnan(ranking.iloc[0, 2]):
-            delta_a = -1
-        else:
-            delta_a = 0
-
-    if not math.isnan(ranking.iloc[1, 2]) and not math.isnan(ranking.iloc[1, 3]):
-        delta_a = (ranking.iloc[1, 3] - ranking.iloc[1, 2]) / \
-                  (ranking.iloc[1, 3] + ranking.iloc[1, 2])
-    else:
-        if not math.isnan(ranking.iloc[1, 3]):
-            delta_b = 1
-        elif not math.isnan(ranking.iloc[1, 2]):
-            delta_b = -1
-        else:
-            delta_b = 0
-
-    return delta_a, delta_b
-
-
 def main():
     # initialize constants =================================================================
 

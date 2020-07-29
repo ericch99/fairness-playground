@@ -17,7 +17,31 @@ def rank_policy(arr_a, arr_b, policy, **kwargs):
         pass
 
 
-# RANKING POLICIES =============================================================================================
+# RANKING POLICIES ==============================================================================================
+
+def rank_max_util(arr_a, arr_b):
+    ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
+    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
+    a, b = 0, 0
+
+    while a < len(arr_a) and b < len(arr_b):
+        if arr_a[a] > arr_b[b]:
+            ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
+            a += 1
+        else:
+            ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
+            b += 1
+
+    # leftovers
+    while a < len(arr_a):
+        ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
+        a += 1
+    while b < len(arr_b):
+        ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
+        b += 1
+
+    return ranking
+
 
 def rank_top_k(arr_a, arr_b, k, p):
     """
@@ -84,34 +108,32 @@ def rank_top_k(arr_a, arr_b, k, p):
     return ranking
 
 
-def rank_max_util(arr_a, arr_b):
-    ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
-    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
-    a, b = 0, 0
-
-    while a < len(arr_a) and b < len(arr_b):
-        if arr_a[a] > arr_b[b]:
-            ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
-            a += 1
-        else:
-            ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
-            b += 1
-
-    # leftovers
-    while a < len(arr_a):
-        ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
-        a += 1
-    while b < len(arr_b):
-        ranking = ranking.append({'rank': a + b + 1, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
-        b += 1
-
-    return ranking
 
 
-# TODO: //////////////////////////////////////////////////////////////////////////////////////////////////////
-# ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 def rank_stochastic(arr_a, arr_b):
+    """
+    INPUT:
+        - k is the top-k parameter
+        - p is the population proportion of the "disadvantaged" class (B)
+        - arr_a and arr_b are ranked lists of subjects from each group, ordered by decreasing relevance 
+
+    * [leave comments here]
+    """
+    pass
+
+
+
+
+
+
+
+    
+
+
+# DEPRECATED ==================================================================================================
+
+def rank_stochastic_alt(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
     ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
     a, b = 0, 0
