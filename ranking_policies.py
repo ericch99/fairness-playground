@@ -12,9 +12,10 @@ def rank_policy(arr_a, arr_b, policy, **kwargs):
         return rank_top_k(arr_a, arr_b, k, p)
     elif policy == 'max-util':
         return rank_max_util(arr_a, arr_b)
+    elif policy == 'stochastic':
+        return rank_stochastic(arr_a, arr_b)
     else:
-        # TODO
-        pass
+        raise NotImplementedError
 
 
 # RANKING POLICIES ==============================================================================================
@@ -108,9 +109,6 @@ def rank_top_k(arr_a, arr_b, k, p):
     return ranking
 
 
-
-
-
 def rank_stochastic(arr_a, arr_b):
     """
     INPUT:
@@ -120,18 +118,20 @@ def rank_stochastic(arr_a, arr_b):
 
     * [leave comments here]
     """
+
+
+
+
+
+
+
+
+
     pass
 
 
-
-
-
-
-
-    
-
-
-# DEPRECATED ==================================================================================================
+# DEPRECATED, delete later //////////////////////////////////////////////////////////////////////////////////////
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 def rank_stochastic_alt(arr_a, arr_b):
     ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
