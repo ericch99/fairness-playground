@@ -11,11 +11,10 @@ def compute_metric(ranking, metric):
     elif metric == 'avg-exposure':
         return avg_exposure(ranking)
     else:
-        # TODO 
-        pass
+        raise NotImplementedError
 
 
-# METRICS ===================================================================================================
+# METRICS ============================================================
 
 def avg_position(ranking):
     return ranking.groupby('group')['rank'].mean()

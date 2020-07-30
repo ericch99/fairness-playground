@@ -13,8 +13,7 @@ def sample_dist(mean, var, ql, prob, dist):
     elif dist == 'logit-normal':
         return sample_logit_normal(mean, var, ql, prob)
     else:
-        # TODO
-        pass
+        raise NotImplementedError
 
 
 # DISTRIBUTIONS =========================================================

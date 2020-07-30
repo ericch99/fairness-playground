@@ -10,11 +10,10 @@ def select_policy(ranking, k, policy):
 	elif policy == 'stochastic':
 		return select_stochastic(ranking, k)
 	else:
-		# TODO
-		pass
+		raise NotImplementedError
 
 
-# SELECTION POLICIES =====================================================================
+# SELECTION POLICIES =======================================================================================
 
 def select_top_k(ranking, k):
 	"""
