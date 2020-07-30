@@ -1,9 +1,13 @@
+import random
 import numpy as np
 import pandas as pd
-import random
+import torch
+import torch.optim as optim
 import fairsearchcore as fsc
 from fairsearchcore.models import FairScoreDoc
 from scipy.special import softmax
+
+from utils import *
 
 
 def rank_policy(arr_a, arr_b, policy, **kwargs):
@@ -111,16 +115,17 @@ def rank_top_k(arr_a, arr_b, k, p):
 
 def rank_stochastic(arr_a, arr_b):
     """
-    INPUT:
-        - k is the top-k parameter
-        - p is the population proportion of the "disadvantaged" class (B)
-        - arr_a and arr_b are ranked lists of subjects from each group, ordered by decreasing relevance 
-
     * [leave comments here]
+    * ...
     """
 
+    s = torch.tensor(["""__INIT HERE__"""])
+    s.requires_grad()
+    optimizer = optim.SGD([s], lr=1e-2)
 
-
+    while """__CONVERGENCE CRITERIA__""":
+        optimizer.zero_grad()
+        loss = ???
 
 
 
