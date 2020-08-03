@@ -88,11 +88,11 @@ def main():
             plt.cla()
             plt.plot(np.arange(NUM_ITER), mean_a, color='C2', label=f'Group A mean')
             plt.plot(np.arange(NUM_ITER), mean_b, color='C0', label=f'Group B mean')
-            plt.savefig(f'heatmaps/relevance-{SUCCESSES[r]}-{FAILS[c]}.png', dpi=72)
+            plt.savefig(f'figures/heatmaps/relevance-{SUCCESSES[r]}-{FAILS[c]}.png', dpi=72)
 
     plt.cla()
     heat_map = sns.heatmap(matrix)
-    plt.savefig(f'heatmaps/feeback_coefficients.png', dpi=72)
+    plt.savefig(f'figures/heatmaps/feedback_coefficients.png', dpi=72)
 
 
 if __name__ == '__main__':
