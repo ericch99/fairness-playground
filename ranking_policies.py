@@ -143,11 +143,11 @@ def rank_stochastic(arr_a, arr_b):
     rel.extend(arr_b)
     model = PlackettLuce(rel, len(arr_a))
     
-    optimizer = optim.SGD(model.s, lr=1e-2)
+    optimizer = optim.SGD([model.s], lr=1e-2)
 
-    delta_NDCG = np.inf
-    prev = 0
-    while delta_NDCG > 0.1:
+    delta_NDCG = 10000
+    prev, counter = 0, 0
+    while abs(delta_NDCG) > 0.01:
         
         # sample from distribution
         rankings = model.sample_rankings(10)
@@ -161,7 +161,13 @@ def rank_stochastic(arr_a, arr_b):
         optimizer.step()
 
         # update delta_NDCG
-        delta_NDCG = float(prev - loss)
-        prev = float(loss)
+        delta_NDCG = prev - loss
+        prev = loss
+        print(delta_NDCG)
+
+        # display counter
+        counter += 1
+        if counter % 10 == 0:
+            print(f'\tITERATION {counter}')
 
     return model.sample_rankings(10)
