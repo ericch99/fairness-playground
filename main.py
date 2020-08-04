@@ -80,6 +80,8 @@ def main():
                         # compute change in population distributions
                         deltas_a[j], deltas_b[j] = update_mean(result)
 
+# -----------------------------------------------------------------------------------------------------------------------
+
                     # take the mean of the metrics over the queries at each step
                     metric_a[i], metric_b[i] = np.mean(a_metrics), np.mean(b_metrics)
 
