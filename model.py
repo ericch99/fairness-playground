@@ -14,7 +14,7 @@ class PlackettLuce():
 	def __init__(self, rel, len_a):
 		self.rel = rel
 		self.len_a = len_a
-		self.s = torchify([0.1 for i in range(len(rel))])
+		self.s = torchify([0 for i in range(len(rel))])
 		self.probs = nn.Softmax(dim=0)(self.s).data.numpy().flatten()
 
 
@@ -38,18 +38,18 @@ class PlackettLuce():
 		
 		for i in range(size):
 			probs_ = np.array(self.probs, copy=True) / self.probs.sum()
-			ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
+			ranking = pd.DataFrame(columns=['index', 'relevance', 'group'])
 
-			ranks = np.random.choice(num_subjects, size=num_subjects, p=probs_, replace=False)
-			ranking = ranking.assign(rank=ranks)
-			ranking['rank'] = pd.to_numeric(ranking['rank'])
+			indices = np.random.choice(num_subjects, size=num_subjects, p=probs_, replace=False)
+			ranking = ranking.assign(index=indices)
+			ranking['index'] = pd.to_numeric(ranking['index'])
 
-			relevances = [self.rel[i] for i in ranks]
+			relevances = [self.rel[i] for i in indices]
 			ranking = ranking.assign(relevance=relevances)
 			ranking['relevance'] = pd.to_numeric(ranking['relevance'])
 
 
-			groups = ['A' if i < self.len_a else 'B' for i in ranks]
+			groups = ['A' if i < self.len_a else 'B' for i in indices]
 			ranking = ranking.assign(group=groups)
 
 			propensity = 1.0
@@ -72,52 +72,50 @@ class PlackettLuce():
 			 paper:		https://arxiv.org/pdf/1902.04056.pdf
 
 		COMMENTS:
-			- ranking is the "rank" column of the DataFrame
+			- ranking is the "index" column of the DataFrame
 			- uses logsumexp for numerical stability
 		"""
 
 		subtracts = torch.zeros_like(self.s)
 		log_probs = torch.zeros_like(self.s)
 
-		relevances = ranking['relevance']
-		ranks = ranking['rank']
+		index = ranking['index']
 
 		for j in range(self.s.size()[0]):
-			# pos_j = position of item j
-			idx = relevances[relevances == self.rel[j]].index[0]
-			pos_j = ranks.iloc[idx]
+			# pos_j = item at position j
+			pos_j = index.iloc[j]
 			log_probs[j] = self.s[pos_j] - logsumexp(self.s - subtracts)
 			subtracts[pos_j] = self.s[pos_j] + 1e6
 
 		return torch.sum(log_probs)
 
 
-	def reinforce_loss(self, rankings):
+	def calculate_loss(self, rankings):
 		"""
-		Calculates total loss using "baseline for variance reduction" trick.
+		Calculates loss using "baseline for variance reduction" trick and stores gradients.
 		From "Policy Learning for Fairness in Ranking" (2019). 
 		repository: 	https://github.com/ashudeep/Fair-PGRank/
 			 paper:		https://arxiv.org/pdf/1902.04056.pdf
 
 		INPUT:
-			rankings:	DataFrame of rankings, where each ranking is itself a 
-						DataFrame with columns ["rank", "relevance", "group"]	
+			rankings:	list of rankings, where each ranking is itself a 
+						DataFrame with columns ["index", "relevance", "group"]	
+
+		OUTPUT:
+			average NDCG of the sampled rankings. 
 	
 		COMMENTS:
-			- uses log-derivative trick to simplify computation
+			- uses log-derivative trick to simplify computation of gradient
 		"""
 
-		loss = 0
-
-
+		rewards = []
 		baseline = np.mean([NDCG(r['relevance']) for r in rankings])
-		print('BASELINE', baseline)
 
 		for r in rankings:
 			reward = NDCG(r['relevance'])
+			rewards.append(reward)
 			log_prob = self.compute_log_probability(r)
-			loss += float(-(reward - baseline)) * log_prob
+			loss = float(-(reward - baseline)) * log_prob
+			loss.backward(retain_graph=True)
 
-
-		print('LOSS', loss)
-		return loss / len(rankings)
+		return np.mean(rewards)

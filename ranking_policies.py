@@ -33,24 +33,24 @@ def rank_max_util(arr_a, arr_b):
     Equivalent to sorting relevances in decreasing order. 
     """
 
-    ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
-    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
+    ranking = pd.DataFrame(columns=['index', 'relevance', 'group'])
+    ranking = ranking.astype({'index': float, 'relevance': float, 'group': str})
     a, b = 0, 0
 
     while a < len(arr_a) and b < len(arr_b):
         if arr_a[a] > arr_b[b]:
-            ranking = ranking.append({'rank': a + b, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
+            ranking = ranking.append({'index': a + b, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
             a += 1
         else:
-            ranking = ranking.append({'rank': a + b, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
+            ranking = ranking.append({'index': a + b, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
             b += 1
 
     # leftovers
     while a < len(arr_a):
-        ranking = ranking.append({'rank': a + b, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
+        ranking = ranking.append({'index': a + b, 'relevance': arr_a[a], 'group': 'A'}, ignore_index=True)
         a += 1
     while b < len(arr_b):
-        ranking = ranking.append({'rank': a + b, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
+        ranking = ranking.append({'index': a + b, 'relevance': arr_b[b], 'group': 'B'}, ignore_index=True)
         b += 1
 
     return ranking
@@ -89,17 +89,17 @@ def rank_top_k(arr_a, arr_b, k, p):
 
     # transform ranking list to dataframe
     idx = [s.id for s in ranking]
-    ranking = pd.DataFrame(columns=['rank', 'relevance', 'group'])
-    ranking = ranking.astype({'rank': float, 'relevance': float, 'group': str})
+    ranking = pd.DataFrame(columns=['index', 'relevance', 'group'])
+    ranking = ranking.astype({'index': float, 'relevance': float, 'group': str})
     
-    for i, s_id in enumerate(idx):
+    for s_id in idx:
         if s_id < len(arr_a):
-            ranking = ranking.append({'rank': i, 
+            ranking = ranking.append({'index': s_id, 
                                       'relevance': arr[s_id].score, 
                                       'group': 'A'}, 
                                      ignore_index=True)
         else:
-            ranking = ranking.append({'rank': i, 
+            ranking = ranking.append({'index': s_id, 
                                       'relevance': arr[s_id].score, 
                                       'group': 'B'},
                                      ignore_index=True)
@@ -110,14 +110,14 @@ def rank_top_k(arr_a, arr_b, k, p):
     leftovers = [arr[i].score for i in idx_leftover] 
     idx_leftover = np.array(idx_leftover)[np.argsort(leftovers)][::-1]
 
-    for i, s_id in enumerate(idx_leftover):
+    for s_id in idx_leftover:
         if s_id < len(arr_a):
-            ranking = ranking.append({'rank': k + i, 
+            ranking = ranking.append({'index': s_id, 
                                       'relevance': arr[s_id].score, 
                                       'group': 'A'}, 
                                      ignore_index=True)
         else:
-            ranking = ranking.append({'rank': k + i, 
+            ranking = ranking.append({'index': s_id, 
                                       'relevance': arr[s_id].score, 
                                       'group': 'B'},
                                      ignore_index=True)
@@ -132,11 +132,12 @@ def rank_stochastic(arr_a, arr_b):
     repository:     https://github.com/ashudeep/Fair-PGRank/
          paper:     https://arxiv.org/pdf/1902.04056.pdf
 
+    OUTPUT:
+        10 sampled rankings from the optimized model
 
-    INPUT: 
-
-    - STOPPING CRITERIA: small change in NDCG 
-    - 
+    COMMENTS:    
+        - STOPPING CRITERIA: small change in NDCG 
+        - 
     """
 
     rel = arr_a.copy()
@@ -147,22 +148,21 @@ def rank_stochastic(arr_a, arr_b):
 
     delta_NDCG = 10000
     prev, counter = 0, 0
+    
     while abs(delta_NDCG) > 0.01:
-        
         # sample from distribution
         rankings = model.sample_rankings(10)
-
-        # estimate loss from samples
-        loss = model.reinforce_loss(rankings)
-
-        # take gradient step, recompute scores
+        
+        # estimate gradient from samples
         optimizer.zero_grad()
-        loss.backward(retain_graph=True)
+        NDCG = model.calculate_loss(rankings)
+    
+        # take gradient step, recompute scores
         optimizer.step()
 
         # update delta_NDCG
-        delta_NDCG = prev - loss
-        prev = loss
+        delta_NDCG = NDCG - prev
+        prev = NDCG
         print(delta_NDCG)
 
         # display counter

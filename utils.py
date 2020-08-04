@@ -18,7 +18,7 @@ def NDCG(rel_r):
     	NDCG computed for given ranking (float) 
 	"""
 	
-	discount = np.fromiter((1 / np.log2(i + 1) for i in range(1, len(rel_r) + 1)), dtype=float)
+	discount = [np.log2(i + 1) for i in range(1, len(rel_r) + 1)]
 	rel_sort = np.sort(rel_r)[::-1]
 
 	DCG_max = np.sum(np.divide(np.power(2, rel_sort) - 1, discount))
