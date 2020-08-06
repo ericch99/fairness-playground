@@ -47,8 +47,8 @@ def main():
     # plot heatmap of difference in means ================================================== 
     plt.cla()
     sns.heatmap(matrix, cmap="Blues")
-    plt.xticks(MEANS_A, MEANS_A)
-    plt.yticks(MEANS_B, MEANS_B)
+    plt.xticks(np.arange(0, 5, 1), labels=MEANS_A)
+    plt.yticks(np.arange(0, 5, 1), labels=MEANS_B)
     plt.ylabel('group b means')
     plt.xlabel('group a means')
     plt.savefig(f'figures/heatmaps/mean_differences.pdf', dpi=300)
