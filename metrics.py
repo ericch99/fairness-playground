@@ -17,11 +17,15 @@ def compute_metric(ranking, metric):
 # METRICS ============================================================
 
 def avg_position(ranking):
-    return ranking.groupby('group')['rank'].mean()
+    return ranking.groupby('group')['index'].mean()
 
 
 def avg_exposure(ranking):
     # do we even need this? log discounting
-    exposure = 1 / math.log2(1 + avg_position(ranking)['rank'])
-    return avg_position(ranking).assign(exposure=exposure)['exposure']
+    idx_a = ranking[ranking['group'] == 'A']['index']
+    idx_b = ranking[ranking['group'] == 'B']['index']
+    exposure_a = np.mean([1 / math.log2(1 + (i + 1)) for i in idx_a])
+    exposure_b = np.mean([1 / math.log2(1 + (i + 1)) for i in idx_b])
+
+    return exposure_a, exposure_b
 

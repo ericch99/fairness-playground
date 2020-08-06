@@ -1,4 +1,5 @@
 import numpy as np
+import json
 import torch
 from torch.autograd import Variable
 
@@ -27,6 +28,28 @@ def NDCG(rel_r):
 	return DCG_r / DCG_max
 
 
+def regularized_NDCG(rel_r):
+	# TODO 
+
+	discount = [np.log2(i + 1) for i in range(1, len(rel_r) + 1)]
+	rel_sort = np.sort(rel_r)[::-1]
+
+	DCG_max = np.sum(np.divide(np.power(2, rel_sort) - 1, discount))
+	DCG_r = np.sum(np.divide(np.power(2, rel_r) - 1, discount))
+
+
+
+
+
+
+
+
+
+
+
+	return DCG_r / DCG_max
+
+
 def logsumexp(inputs):
     """
     Numerically stable logsumexp function.  
@@ -48,4 +71,5 @@ def logsumexp(inputs):
 
     s, _ = torch.max(inputs, dim=0, keepdim=True)
     outputs = s + (inputs - s).exp().sum(dim=0, keepdim=True).log()
+
     return outputs

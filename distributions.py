@@ -22,10 +22,10 @@ def sample_beta(mean, var, ql, prob):
     a = (((1 - mean) / var) - (1 / mean)) * (mean ** 2)
     b = a * ((1 / mean) - 1)
     arr = np.array(beta.rvs(a, b, size=int(ql * prob)))
-    return np.sort(arr)[::-1]
+    return np.sort(arr)[::-1].tolist()
 
 
 def sample_logit_normal(mean, var, ql, prob):
     x = np.array(norm.rvs(loc=mean, scale=var, size=int(ql * prob)))
     arr = 1 / (1 + np.exp(-x))
-    return np.sort(arr)[::-1]
+    return np.sort(arr)[::-1].tolist()

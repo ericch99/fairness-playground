@@ -14,8 +14,8 @@ class PlackettLuce():
 	def __init__(self, rel, len_a):
 		self.rel = rel
 		self.len_a = len_a
-		self.s = torchify([0 for i in range(len(rel))])
-		self.probs = nn.Softmax(dim=0)(self.s).data.numpy().flatten()
+		self.s = torchify([10 * np.random.random_sample() for i in range(len(rel))])
+		self.probs = nn.Softmax(dim=0)(self.s)
 
 
 	def sample_rankings(self, size):
@@ -37,7 +37,8 @@ class PlackettLuce():
 		rankings, propensities = [], []
 		
 		for i in range(size):
-			probs_ = np.array(self.probs, copy=True) / self.probs.sum()
+			probs_ = self.probs.data.numpy().flatten()
+
 			ranking = pd.DataFrame(columns=['index', 'relevance', 'group'])
 
 			indices = np.random.choice(num_subjects, size=num_subjects, p=probs_, replace=False)
@@ -48,18 +49,10 @@ class PlackettLuce():
 			ranking = ranking.assign(relevance=relevances)
 			ranking['relevance'] = pd.to_numeric(ranking['relevance'])
 
-
 			groups = ['A' if i < self.len_a else 'B' for i in indices]
 			ranking = ranking.assign(group=groups)
-
-			propensity = 1.0
-			# for i in range(num_subjects):
-				# propensity *= probs_[ranking[i]]
-				# probs_[ranking[i]] = 0.0
-				# probs_ /= probs_.sum()
-
+			
 			rankings.append(ranking)
-			propensities.append(propensity)
 		
 		return rankings
 
@@ -85,7 +78,7 @@ class PlackettLuce():
 			# pos_j = item at position j
 			pos_j = index.iloc[j]
 			log_probs[j] = self.s[pos_j] - logsumexp(self.s - subtracts)
-			subtracts[pos_j] = self.s[pos_j] + 1e6
+			subtracts[pos_j] = self.s[pos_j] + 1e3
 
 		return torch.sum(log_probs)
 
@@ -115,7 +108,13 @@ class PlackettLuce():
 			reward = NDCG(r['relevance'])
 			rewards.append(reward)
 			log_prob = self.compute_log_probability(r)
-			loss = float(-(reward - baseline)) * log_prob
+			loss = float(-1e3 * (reward - baseline)) * log_prob
 			loss.backward(retain_graph=True)
 
 		return np.mean(rewards)
+
+
+	def update_probs(self):
+		self.probs = nn.Softmax(dim=0)(self.s) 
+		# print('SCORES:', self.s)
+		# print('PROBS:', self.probs)
