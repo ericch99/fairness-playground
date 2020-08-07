@@ -16,7 +16,7 @@ def generate_input():
            'query_len': 20}
 
     penalty = {'pos': 0.5, 
-    		   'neg': -0.25, 
+    		   'neg': -0.5,
     		   'non': 0}
 
     return A, B, sim, penalty
