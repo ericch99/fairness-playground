@@ -28,26 +28,42 @@ def NDCG(rel_r):
 	return DCG_r / DCG_max
 
 
-def regularized_NDCG(rel_r):
-	# TODO 
+def compute_fairness_regularizer(rankings):
+	"""
+	Computes exposure-based regularization term for fairness. 
+	
+	INPUT:
+   		rankings:	length-n list of sampled rankings
 
-	discount = [np.log2(i + 1) for i in range(1, len(rel_r) + 1)]
-	rel_sort = np.sort(rel_r)[::-1]
+	OUTPUT:
+    	value of regularizer (float) 
+	"""
 
-	DCG_max = np.sum(np.divide(np.power(2, rel_sort) - 1, discount))
-	DCG_r = np.sum(np.divide(np.power(2, rel_r) - 1, discount))
+	merit = rankings[0].groupby('group')['relevance'].mean()
+	M_G_A, M_G_B = merit.loc['A'], merit.loc['B']
+
+	v_G_A, v_G_B = [], []
+	for r in rankings:
+		v_G_A.append(np.mean([1 / np.log2((idx + 1) + 1) for idx in list(np.where(r['group'] == 'A'))]))
+		v_G_B.append(np.mean([1 / np.log2((idx + 1) + 1) for idx in list(np.where(r['group'] == 'B'))]))
+
+	if M_G_A == 0 or M_G_B == 0:
+		return 0
+	elif M_G_A > M_G_B:
+
+		
+		print(max(0, (np.mean(v_G_A) / M_G_A) - (np.mean(v_G_B) / M_G_B)))
+		print('M_G_A:', M_G_A)
+		print('M_G_B:', M_G_B)
+		print('v_G_A:', np.mean(v_G_A))
+		print('v_G_B:', np.mean(v_G_B))
+		print('t1:', np.mean(v_G_A) / M_G_A)
+		print('t2:', np.mean(v_G_B) / M_G_B)
 
 
-
-
-
-
-
-
-
-
-
-	return DCG_r / DCG_max
+		return max(0, (np.mean(v_G_A) / M_G_A) - (np.mean(v_G_B) / M_G_B))
+	else: # if M_G_B >= M_G_A 
+		return max(0, (np.mean(v_G_B) / M_G_B) - (np.mean(v_G_A) / M_G_A))
 
 
 def logsumexp(inputs):
@@ -73,3 +89,15 @@ def logsumexp(inputs):
     outputs = s + (inputs - s).exp().sum(dim=0, keepdim=True).log()
 
     return outputs
+
+def calculate_ratio(ranking):
+	"""
+	TODO:
+		- this function is for debugging purposes
+		- it should return the exposure-to-merit ratio of each group
+		- ensures stochastic ranking constraint is met and enforced 
+	"""
+
+	exposure_a, exposure_b = 0, 0
+
+	return exposure_a, exposure_b

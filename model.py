@@ -103,12 +103,13 @@ class PlackettLuce():
 
 		rewards = []
 		baseline = np.mean([NDCG(r['relevance']) for r in rankings])
-
+		regularizer = compute_fairness_regularizer(rankings)
+		
 		for r in rankings:
 			reward = NDCG(r['relevance'])
 			rewards.append(reward)
 			log_prob = self.compute_log_probability(r)
-			loss = float(-1e3 * (reward - baseline)) * log_prob
+			loss = float(-1e3 * (reward - baseline - regularizer)) * log_prob
 			loss.backward(retain_graph=True)
 
 		return np.mean(rewards)

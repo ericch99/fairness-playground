@@ -148,7 +148,7 @@ def rank_stochastic(arr_a, arr_b):
     prev, counter = 0, 0
 
     delta_NDCG = 10000 
-    while abs(delta_NDCG) > 1e-6: 
+    while abs(delta_NDCG) > 1e-4: 
 
         # sample from distribution
         rankings = model.sample_rankings(10)
