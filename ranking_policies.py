@@ -143,12 +143,12 @@ def rank_stochastic(arr_a, arr_b):
     rel = arr_a.copy()
     rel.extend(arr_b)
     model = PlackettLuce(rel, len(arr_a))    
-    optimizer = optim.SGD([model.s], lr=1e-2)
+    optimizer = optim.SGD([model.s], lr=5e-2)
     
     prev, counter = 0, 0
 
     delta_NDCG = 10000 
-    while abs(delta_NDCG) > 1e-4: 
+    while abs(delta_NDCG) > 1e-5:
 
         # sample from distribution
         rankings = model.sample_rankings(10)

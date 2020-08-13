@@ -50,17 +50,6 @@ def compute_fairness_regularizer(rankings):
 	if M_G_A == 0 or M_G_B == 0:
 		return 0
 	elif M_G_A > M_G_B:
-
-		
-		print(max(0, (np.mean(v_G_A) / M_G_A) - (np.mean(v_G_B) / M_G_B)))
-		print('M_G_A:', M_G_A)
-		print('M_G_B:', M_G_B)
-		print('v_G_A:', np.mean(v_G_A))
-		print('v_G_B:', np.mean(v_G_B))
-		print('t1:', np.mean(v_G_A) / M_G_A)
-		print('t2:', np.mean(v_G_B) / M_G_B)
-
-
 		return max(0, (np.mean(v_G_A) / M_G_A) - (np.mean(v_G_B) / M_G_B))
 	else: # if M_G_B >= M_G_A 
 		return max(0, (np.mean(v_G_B) / M_G_B) - (np.mean(v_G_A) / M_G_A))

@@ -14,7 +14,7 @@ class PlackettLuce():
 	def __init__(self, rel, len_a):
 		self.rel = rel
 		self.len_a = len_a
-		self.s = torchify([10 * np.random.random_sample() for i in range(len(rel))])
+		self.s = torchify([np.random.random_sample() for i in range(len(rel))])
 		self.probs = nn.Softmax(dim=0)(self.s)
 
 
@@ -109,8 +109,12 @@ class PlackettLuce():
 			reward = NDCG(r['relevance'])
 			rewards.append(reward)
 			log_prob = self.compute_log_probability(r)
-			loss = float(-1e3 * (reward - baseline - regularizer)) * log_prob
+			loss = float(-1e2 * (reward - baseline - regularizer)) * log_prob
 			loss.backward(retain_graph=True)
+
+			# entropy regularizer to enforce stochasticity
+			entropy_loss = torch.sum(torch.log(self.probs) * self.probs)
+			entropy_loss.backward(retain_graph=True)
 
 		return np.mean(rewards)
 
