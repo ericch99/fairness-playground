@@ -6,6 +6,7 @@ from gen_input import *
 def main():
     # PARAMETERS ===============================================
     A, B, sim, penalty = generate_input()
+    num_iter = 10
 
     # RUN SIMULATION ===========================================
     s = Simulation(A, B, sim, penalty)
@@ -14,11 +15,11 @@ def main():
     print([f'{k}: {v}' for k, v in s.__dict__.items()], '\n')
 
     print('RUNNING SIMULATION...\n')
-    s.run_simulation(n=10)
+    metric_a, mean_a, metric_b, mean_b = s.run_simulation(n=num_iter)
 
     # PLOT METRICS =============================================
     print('PLOTTING METRICS...')
-    s.plot_metrics()  
+    s.plot_metrics(num_iter, metric_a, mean_a, metric_b, mean_b)
 
 
 if __name__ == '__main__':
