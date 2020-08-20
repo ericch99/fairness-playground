@@ -53,7 +53,6 @@ class Simulation():
         mean_a[i], mean_b[i] = self.MEAN_A, self.MEAN_B
         self.update_means(deltas_a, deltas_b)
 
-
     def run_query(self, j, metrics_a, deltas_a, metrics_b, deltas_b):
         # sample subjects from underlying distribution
         arr_a = sample_dist(self.MEAN_A, self.VAR_A, self.QUERY_LEN, self.PROB_A, self.DIST)
@@ -92,7 +91,6 @@ class Simulation():
             # compute change in distributions
             deltas_a[j], deltas_b[j] = self.calculate_delta(result)
 
-    
     def calculate_delta(self, result):
         result['delta'] = [self.penalties[0] if (row.selected and row.succeeded) 
                            else (self.penalties[1] if row.selected else self.penalties[2]) 
@@ -102,11 +100,9 @@ class Simulation():
 
         return result['A'], result['B']
 
-
     def update_means(self, deltas_a, deltas_b):
         self.MEAN_A += np.mean(deltas_a)
         self.MEAN_B += np.mean(deltas_b)
-
 
     def plot_metrics(self, n, metric_a, mean_a, metric_b, mean_b):
         sns.set(style='darkgrid')
@@ -115,10 +111,16 @@ class Simulation():
         plt.cla()
         plt.plot(np.arange(n), metric_a, color='C2', label=f'Group A {self.METRIC}')
         plt.plot(np.arange(n), metric_b, color='C0', label=f'Group B {self.METRIC}')
-        plt.savefig(f'figures/{self.RANK_POLICY}-{self.SELECT_POLICY}-{self.PROB_A}/{self.METRIC}_{n}.pdf', dpi=300)
+        plt.savefig(f'figures/final_sims/varying_k/{self.RANK_POLICY}-{self.SELECT_POLICY}-{self.METRIC}_{n}.pdf', dpi=300)
 
         # plot the change in relevance over time
         plt.cla()
         plt.plot(np.arange(n), 1 / (1 + np.exp(-mean_a)), color='C2', label=f'Group A relevance')
         plt.plot(np.arange(n), 1 / (1 + np.exp(-mean_b)), color='C0', label=f'Group B relevance')
-        plt.savefig(f'figures/{self.RANK_POLICY}-{self.SELECT_POLICY}-{self.PROB_A}/relevance_{n}.pdf', dpi=300)
+        plt.savefig(f'figures/final_sims/varying_k/{self.RANK_POLICY}-{self.SELECT_POLICY}-relevance_{n}.pdf', dpi=300)
+
+        # plot the change in mean over time
+        plt.cla()
+        plt.plot(np.arange(n), mean_a, color='C2', label=f'Group A mean')
+        plt.plot(np.arange(n), mean_b, color='C0', label=f'Group B mean')
+        plt.savefig(f'figures/final_sims/varying_k/{self.RANK_POLICY}-{self.SELECT_POLICY}-mean_{n}.pdf', dpi=300)
