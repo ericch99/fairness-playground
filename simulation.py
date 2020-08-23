@@ -111,16 +111,19 @@ class Simulation():
         plt.cla()
         plt.plot(np.arange(n), metric_a, color='C2', label=f'Group A {self.METRIC}')
         plt.plot(np.arange(n), metric_b, color='C0', label=f'Group B {self.METRIC}')
-        plt.savefig(f'figures/final_sims/varying_k/{self.RANK_POLICY}-{self.SELECT_POLICY}-{self.METRIC}_{n}.pdf', dpi=300)
+        plt.legend()
+        plt.savefig(f'figures/final_sims/varying_k/{self.k}/{self.RANK_POLICY}-{self.SELECT_POLICY}-{self.METRIC}_{n}.pdf', dpi=300)
 
         # plot the change in relevance over time
         plt.cla()
         plt.plot(np.arange(n), 1 / (1 + np.exp(-mean_a)), color='C2', label=f'Group A relevance')
         plt.plot(np.arange(n), 1 / (1 + np.exp(-mean_b)), color='C0', label=f'Group B relevance')
-        plt.savefig(f'figures/final_sims/varying_k/{self.RANK_POLICY}-{self.SELECT_POLICY}-relevance_{n}.pdf', dpi=300)
+        plt.legend()
+        plt.savefig(f'figures/final_sims/varying_k/{self.k}/{self.RANK_POLICY}-{self.SELECT_POLICY}-relevance_{n}.pdf', dpi=300)
 
         # plot the change in mean over time
         plt.cla()
         plt.plot(np.arange(n), mean_a, color='C2', label=f'Group A mean')
         plt.plot(np.arange(n), mean_b, color='C0', label=f'Group B mean')
-        plt.savefig(f'figures/final_sims/varying_k/{self.RANK_POLICY}-{self.SELECT_POLICY}-mean_{n}.pdf', dpi=300)
+        plt.legend()
+        plt.savefig(f'figures/final_sims/varying_k/{self.k}/{self.RANK_POLICY}-{self.SELECT_POLICY}-mean_{n}.pdf', dpi=300)

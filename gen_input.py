@@ -1,10 +1,10 @@
 def generate_input():
 
-    A = {'mean': 1, 
+    A = {'mean': 0,
     	 'var': 1, 
     	 'prob': 0.5}
     
-    B = {'mean': 0, 
+    B = {'mean': -1,
     	 'var': 1, 
     	 'prob': 0.5}
     
