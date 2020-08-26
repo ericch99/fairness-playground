@@ -25,8 +25,8 @@ def plot_all(k, rank, select, n, big_a, big_b, big_a_1, big_b_1, big_a_2, big_b_
     plt.errorbar(np.arange(n), mean_b_2, yerr=np.std(big_b_2, axis=0), fmt=':', color='C0', label='Group B mean (B = -0.1, A = 0)')
     plt.legend()
     plt.ylim((-5, 10))
-    plt.ylabel('Time')
-    plt.xlabel('Means')
+    plt.ylabel('Means')
+    plt.xlabel('2Time')
     plt.savefig(f'figures/final_sims/varying_k/{k}/{rank}-{select}-{n}-all.pdf', dpi=300)
 
 
